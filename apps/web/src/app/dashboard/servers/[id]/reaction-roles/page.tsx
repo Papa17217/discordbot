@@ -92,8 +92,14 @@ export default function ReactionRolesPage() {
   };
 
   const handleSave = async () => {
-    if (!currentPanel.title) return toast.error('Tytuł jest wymagany');
-    if (!currentPanel.buttons || currentPanel.buttons.length === 0) return toast.error('Dodaj przynajmniej jeden przycisk');
+    if (!currentPanel.title) {
+      toast.error('Tytuł jest wymagany');
+      return;
+    }
+    if (!currentPanel.buttons || currentPanel.buttons.length === 0) {
+      toast.error('Dodaj przynajmniej jeden przycisk');
+      return;
+    }
 
     setIsSaving(true);
     try {
