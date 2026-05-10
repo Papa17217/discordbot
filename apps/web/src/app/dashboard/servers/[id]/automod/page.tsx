@@ -21,6 +21,7 @@ interface AutoModRule {
   words: string[];
   exemptRoles: string[];
   exemptChannels: string[];
+  targetChannels?: string[];
   alertChannelId?: string;
   customResponse?: string;
 }
