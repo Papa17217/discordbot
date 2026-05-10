@@ -14,10 +14,11 @@ export async function handleReactionRoleButton(client: BotClient, interaction: B
   try {
     const role = interaction.guild?.roles.cache.get(roleId);
     if (!role) {
-      return interaction.reply({
+      await interaction.reply({
         embeds: [Embed.error('Błąd', 'Nie znaleziono przypisanej roli na tym serwerze.')],
         ephemeral: true
       });
+      return;
     }
 
     if (member.roles.cache.has(roleId)) {

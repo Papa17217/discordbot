@@ -21,8 +21,7 @@ export default class MessageCreateEvent extends Event<'messageCreate'> {
       // handleAutoMod sam sprawdza czy jest włączony i wykonuje akcje
       await handleAutoMod(client, message);
       
-      // Jeśli wiadomość została usunięta przez AutoMod, nie przyznajemy XP
-      if (message.deleted) return;
+
 
       const guild = await client.prisma.guild.findUnique({
         where: { discordId: message.guild.id },

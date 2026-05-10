@@ -134,13 +134,13 @@ async function executeAction(client: BotClient, message: Message, rule: any, rea
             { name: 'Treść', value: message.content.slice(0, 1024) }
           )
           .setTimestamp();
-        await alertChannel.send({ embeds: [logEmbed] });
+        await (alertChannel as any).send({ embeds: [logEmbed] });
       }
     }
 
     // 2. Wyślij odpowiedź do użytkownika
     if (rule.customResponse) {
-      await message.channel.send(`${message.author}, ${rule.customResponse}`).then(msg => {
+      await (message.channel as any).send(`${message.author}, ${rule.customResponse}`).then((msg: Message) => {
         setTimeout(() => msg.delete().catch(() => {}), 5000);
       });
     }

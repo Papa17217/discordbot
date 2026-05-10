@@ -7,11 +7,12 @@ import {
   ChatInputCommandInteraction,
   PermissionFlagsBits,
   SlashCommandSubcommandsOnlyBuilder,
+  SlashCommandOptionsOnlyBuilder,
 } from 'discord.js';
 import type { BotClient } from '../client';
 
 export interface CommandOptions {
-  data: SlashCommandBuilder | Omit<SlashCommandBuilder, 'addSubcommand' | 'addSubcommandGroup'> | SlashCommandSubcommandsOnlyBuilder;
+  data: SlashCommandBuilder | Omit<SlashCommandBuilder, 'addSubcommand' | 'addSubcommandGroup'> | SlashCommandSubcommandsOnlyBuilder | SlashCommandOptionsOnlyBuilder;
   cooldown?: number; // sekundy
   premium?: boolean;
   permissions?: bigint[];

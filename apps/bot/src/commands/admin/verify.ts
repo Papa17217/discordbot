@@ -34,7 +34,7 @@ export default class VerifyCommand extends Command {
       .setTitle('Weryfikacja systemu')
       .setDescription('Kliknij w przycisk poniżej, aby udowodnić, że nie jesteś robotem i uzyskać dostęp do serwera.');
 
-    await interaction.channel?.send({ embeds: [embed], components: [row] });
+    await (interaction.channel as any)?.send({ embeds: [embed], components: [row] });
     await interaction.reply({ content: 'Panel weryfikacji został pomyślnie utworzony.', ephemeral: true });
   }
 }
