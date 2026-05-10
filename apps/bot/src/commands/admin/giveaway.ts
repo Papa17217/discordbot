@@ -39,7 +39,7 @@ export default class GiveawayCommand extends Command {
       .setDescription(`**Nagroda:** ${prize}\n**Zwycięzcy:** ${winners}\n**Kończy się:** <t:${endTime}:R>`)
       .setFooter({ text: 'Zareaguj 🎉 aby dołączyć!' });
 
-    const msg = await interaction.channel?.send({ embeds: [embed] });
+    const msg = await (interaction.channel as any)?.send({ embeds: [embed] });
     await msg?.react('🎉');
 
     await interaction.reply({ content: 'Giveaway rozpoczął się pomyślnie!', ephemeral: true });

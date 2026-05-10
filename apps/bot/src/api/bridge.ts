@@ -16,7 +16,8 @@ export function startBridge(client: BotClient) {
   app.use((req, res, next) => {
     const token = req.headers['x-bot-secret'];
     if (token !== SECRET) {
-      return res.status(401).json({ error: 'Unauthorized' });
+      res.status(401).json({ error: 'Unauthorized' });
+      return;
     }
     next();
   });
@@ -37,7 +38,10 @@ export function startBridge(client: BotClient) {
   // ── Informacje o guildzie ────────────────
   app.get('/guilds/:guildId', (req, res) => {
     const guild = client.guilds.cache.get(req.params.guildId);
-    if (!guild) return res.status(404).json({ error: 'Guild not found' });
+    if (!guild) {
+      res.status(404).json({ error: 'Guild not found' });
+      return;
+    }
 
     res.json({
       id: guild.id,
@@ -52,7 +56,10 @@ export function startBridge(client: BotClient) {
   // ── Lista kanałów guildu ─────────────────
   app.get('/guilds/:guildId/channels', (req, res) => {
     const guild = client.guilds.cache.get(req.params.guildId);
-    if (!guild) return res.status(404).json({ error: 'Guild not found' });
+    if (!guild) {
+      res.status(404).json({ error: 'Guild not found' });
+      return;
+    }
 
     const channels = guild.channels.cache.map((c) => ({
       id: c.id,
@@ -67,7 +74,10 @@ export function startBridge(client: BotClient) {
   // ── Lista ról guildu ─────────────────────
   app.get('/guilds/:guildId/roles', (req, res) => {
     const guild = client.guilds.cache.get(req.params.guildId);
-    if (!guild) return res.status(404).json({ error: 'Guild not found' });
+    if (!guild) {
+      res.status(404).json({ error: 'Guild not found' });
+      return;
+    }
 
     const roles = guild.roles.cache
       .filter((r) => r.id !== guild.id)
@@ -97,11 +107,15 @@ export function startBridge(client: BotClient) {
   app.post('/guilds/:guildId/tickets/send-panel', async (req, res) => {
     const { channelId, embed, buttons } = req.body;
     const guild = client.guilds.cache.get(req.params.guildId);
-    if (!guild) return res.status(404).json({ error: 'Guild not found' });
+    if (!guild) {
+      res.status(404).json({ error: 'Guild not found' });
+      return;
+    }
 
     const channel = guild.channels.cache.get(channelId);
     if (!channel || !channel.isTextBased()) {
-      return res.status(400).json({ error: 'Invalid channel' });
+      res.status(400).json({ error: 'Invalid channel' });
+      return;
     }
 
     try {
@@ -149,18 +163,25 @@ export function startBridge(client: BotClient) {
     const { messageId, guildId } = req.params;
 
     const guild = client.guilds.cache.get(guildId);
-    if (!guild) return res.status(404).json({ error: 'Guild not found' });
+    if (!guild) {
+      res.status(404).json({ error: 'Guild not found' });
+      return;
+    }
 
     const channel = guild.channels.cache.get(channelId);
     if (!channel || !channel.isTextBased()) {
-      return res.status(400).json({ error: 'Invalid channel' });
+      res.status(400).json({ error: 'Invalid channel' });
+      return;
     }
 
     try {
       const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
       
       const message = await (channel as any).messages.fetch(messageId);
-      if (!message) return res.status(404).json({ error: 'Message not found' });
+      if (!message) {
+        res.status(404).json({ error: 'Message not found' });
+        return;
+      }
 
       const discordEmbed = new EmbedBuilder()
         .setTitle(embed.title)
@@ -207,12 +228,14 @@ export function startBridge(client: BotClient) {
     const guild = client.guilds.cache.get(guildId);
     if (!guild) {
       console.error(`[BRIDGE] Guild ${guildId} not found in bot cache! Total guilds: ${client.guilds.cache.size}`);
-      return res.status(404).json({ error: 'Guild not found' });
+      res.status(404).json({ error: 'Guild not found' });
+      return;
     }
 
     const channel = guild.channels.cache.get(channelId);
     if (!channel || !channel.isTextBased()) {
-      return res.status(400).json({ error: 'Invalid channel' });
+      res.status(400).json({ error: 'Invalid channel' });
+      return;
     }
 
     try {
@@ -268,18 +291,25 @@ export function startBridge(client: BotClient) {
     const { messageId, guildId } = req.params;
 
     const guild = client.guilds.cache.get(guildId);
-    if (!guild) return res.status(404).json({ error: 'Guild not found' });
+    if (!guild) {
+      res.status(404).json({ error: 'Guild not found' });
+      return;
+    }
 
     const channel = guild.channels.cache.get(channelId);
     if (!channel || !channel.isTextBased()) {
-      return res.status(400).json({ error: 'Invalid channel' });
+      res.status(400).json({ error: 'Invalid channel' });
+      return;
     }
 
     try {
       const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
       
       const message = await (channel as any).messages.fetch(messageId);
-      if (!message) return res.status(404).json({ error: 'Message not found' });
+      if (!message) {
+        res.status(404).json({ error: 'Message not found' });
+        return;
+      }
 
       const discordEmbed = new EmbedBuilder()
         .setTitle(embed.title)

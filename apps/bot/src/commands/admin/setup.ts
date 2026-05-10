@@ -43,8 +43,8 @@ export default class SetupCommand extends Command {
     if (subcommand === 'welcome') {
       await client.prisma.welcomeConfig.upsert({
         where: { guildId: guild.id },
-        update: { channelId: channel.id, enabled: true },
-        create: { guildId: guild.id, channelId: channel.id, enabled: true },
+        update: { channelId: channel.id, dmEnabled: true },
+        create: { guildId: guild.id, channelId: channel.id, dmEnabled: true },
       });
       await interaction.reply({ embeds: [Embed.success('Sukces', `Kanał powitań ustawiony na <#${channel.id}>`)], ephemeral: true });
     } else if (subcommand === 'logs') {

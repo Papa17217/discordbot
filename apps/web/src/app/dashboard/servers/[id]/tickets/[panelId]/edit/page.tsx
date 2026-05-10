@@ -1,6 +1,6 @@
 'use client';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Ticket, ArrowLeft, Plus, Trash2, Send, Layout, MousePointer2, Type, Palette, Hash, UserPlus, MessageCircle, ShieldAlert, Check, ChevronDown, BellRing, Image as ImageIcon, AlignLeft, Search, X, Loader2, User, Eye, EyeOff, Megaphone, MegaPhone, Save } from 'lucide-react';
+import { Ticket, ArrowLeft, Plus, Trash2, Send, Layout, MousePointer2, Type, Palette, Hash, UserPlus, MessageCircle, ShieldAlert, Check, ChevronDown, BellRing, Image as ImageIcon, AlignLeft, Search, X, Loader2, User, Eye, EyeOff, Megaphone, Save } from 'lucide-react';
 import { useEffect, useState, useMemo } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { api } from '@/lib/api';
@@ -189,7 +189,10 @@ export default function EditTicketPanelPage() {
   };
 
   const addButton = () => {
-    if (buttons.length >= 5) return toast.error('Maksymalnie 5 przycisków');
+    if (buttons.length >= 5) {
+      toast.error('Maksymalnie 5 przycisków');
+      return;
+    }
     setButtons([...buttons, {
       id: Math.random().toString(36).substr(2, 9),
       label: 'Nowy Przycisk',
@@ -221,12 +224,18 @@ export default function EditTicketPanelPage() {
     const btn = buttons.find(b => b.id === btnId);
     if (!btn) return;
     let newActions = (btn.actions || []).includes(action) ? btn.actions.filter(a => a !== action) : [...(btn.actions || []), action];
-    if (newActions.length === 0) return toast.error('Minimum jedna akcja');
+    if (newActions.length === 0) {
+      toast.error('Minimum jedna akcja');
+      return;
+    }
     updateButton(btnId, { actions: newActions });
   };
 
   const handleSubmit = async () => {
-    if (!channelId) return toast.error('Wybierz kanał');
+    if (!channelId) {
+      toast.error('Wybierz kanał');
+      return;
+    }
     setIsSubmitting(true);
     try {
       await api.patch(`/guilds/${serverId}/tickets/panels/${panelId}`, { channelId, title, description, color, footer, thumbnail, image, buttons });

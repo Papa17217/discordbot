@@ -194,7 +194,10 @@ export default function NewTicketPanelPage() {
   };
 
   const addButton = () => {
-    if (buttons.length >= 5) return toast.error('Maksymalnie 5 przycisków');
+    if (buttons.length >= 5) {
+      toast.error('Maksymalnie 5 przycisków');
+      return;
+    }
     setButtons([...buttons, {
       id: Math.random().toString(36).substr(2, 9),
       label: 'Nowy Przycisk',
@@ -226,12 +229,18 @@ export default function NewTicketPanelPage() {
     const btn = buttons.find(b => b.id === btnId);
     if (!btn) return;
     let newActions = btn.actions.includes(action) ? btn.actions.filter(a => a !== action) : [...btn.actions, action];
-    if (newActions.length === 0) return toast.error('Minimum jedna akcja');
+    if (newActions.length === 0) {
+      toast.error('Minimum jedna akcja');
+      return;
+    }
     updateButton(btnId, { actions: newActions });
   };
 
   const handleSubmit = async () => {
-    if (!channelId) return toast.error('Wybierz kanał');
+    if (!channelId) {
+      toast.error('Wybierz kanał');
+      return;
+    }
     setIsSubmitting(true);
     try {
       await api.post(`/guilds/${serverId}/tickets/panels`, { channelId, title, description, color, footer, thumbnail, image, buttons });

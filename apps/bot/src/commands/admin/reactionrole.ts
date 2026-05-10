@@ -55,7 +55,7 @@ export default class ReactionRoleCommand extends Command {
       .setTitle('Wybierz swoje role')
       .setDescription('Kliknij w przyciski poniżej, aby otrzymać lub zdjąć przypisane role.');
 
-    await interaction.channel?.send({ embeds: [embed], components: [row] });
+    await (interaction.channel as any)?.send({ embeds: [embed], components: [row] });
     await interaction.reply({ content: 'Panel ról został pomyślnie utworzony.', ephemeral: true });
   }
 }
