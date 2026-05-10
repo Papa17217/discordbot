@@ -1,0 +1,110 @@
+// ============================================
+// WebSocket Gateway — Real-time Events
+// ============================================
+
+import {
+  WebSocketGateway,
+  WebSocketServer,
+  SubscribeMessage,
+  OnGatewayConnection,
+  OnGatewayDisconnect,
+  ConnectedSocket,
+  MessageBody,
+} from '@nestjs/websockets';
+import { Server, Socket } from 'socket.io';
+import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
+
+@WebSocketGateway({
+  cors: {
+    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+    credentials: true,
+  },
+  namespace: '/ws',
+})
+export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
+  @WebSocketServer()
+  server!: Server;
+
+  private connectedUsers = new Map<string, string>(); // socketId -> userId
+
+  constructor(
+    private jwtService: JwtService,
+    private configService: ConfigService,
+  ) {}
+
+  // ── Połączenie — weryfikacja JWT ───────────
+
+  async handleConnection(client: Socket) {
+    try {
+      const token =
+        client.handshake.auth?.token ||
+        client.handshake.headers?.authorization?.replace('Bearer ', '');
+
+      if (!token) {
+        client.disconnect();
+        return;
+      }
+
+      const payload = await this.jwtService.verifyAsync(token, {
+        secret: this.configService.get('JWT_SECRET'),
+      });
+
+      this.connectedUsers.set(client.id, payload.sub);
+      console.log(`🔌 WebSocket: ${payload.username} połączony (${client.id})`);
+    } catch {
+      client.disconnect();
+    }
+  }
+
+  handleDisconnect(client: Socket) {
+    const userId = this.connectedUsers.get(client.id);
+    this.connectedUsers.delete(client.id);
+    if (userId) {
+      console.log(`🔌 WebSocket: rozłączono (${client.id})`);
+    }
+  }
+
+  // ── Subskrypcja do pokoju serwera ──────────
+
+  @SubscribeMessage('guild:join')
+  handleJoinGuild(@ConnectedSocket() client: Socket, @MessageBody() guildId: string) {
+    client.join(`guild:${guildId}`);
+    console.log(`📡 ${client.id} dołączył do pokoju guild:${guildId}`);
+  }
+
+  @SubscribeMessage('guild:leave')
+  handleLeaveGuild(@ConnectedSocket() client: Socket, @MessageBody() guildId: string) {
+    client.leave(`guild:${guildId}`);
+  }
+
+  // ── Emit Events (wywoływane z serwisów) ────
+
+  emitToGuild(guildId: string, event: string, data: any) {
+    this.server.to(`guild:${guildId}`).emit(event, data);
+  }
+
+  emitToAll(event: string, data: any) {
+    this.server.emit(event, data);
+  }
+
+  emitBotStatus(data: { online: boolean; uptime: number; guilds: number; ping: number }) {
+    this.server.emit('bot:status', data);
+  }
+
+  emitModerationAction(guildId: string, data: any) {
+    this.emitToGuild(guildId, 'moderation:action', data);
+  }
+
+  emitAnalyticsUpdate(guildId: string, data: any) {
+    this.emitToGuild(guildId, 'analytics:update', data);
+  }
+
+  emitGuildStatsUpdate(guildId: string, data: any) {
+    this.emitToGuild(guildId, 'guild:stats:update', data);
+  }
+
+  getConnectedCount(): number {
+    return this.connectedUsers.size;
+  }
+}

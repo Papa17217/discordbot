@@ -1,0 +1,29 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "commonjs",
+    "lib": ["ES2022"],
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "moduleResolution": "node",
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "incremental": true,
+    "baseUrl": ".",
+    "paths": {
+      "@discord-saas/types": ["packages/types/src"],
+      "@discord-saas/shared": ["packages/shared/src"],
+      "@discord-saas/ui": ["packages/ui/src"],
+      "@discord-saas/config": ["packages/config"]
+    }
+  },
+  "exclude": ["node_modules", "dist", ".next", ".turbo"]
+}

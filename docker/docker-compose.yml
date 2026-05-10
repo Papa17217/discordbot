@@ -1,0 +1,85 @@
+version: "3.8"
+
+services:
+  # ── PostgreSQL (Development) ──────────────
+  postgres:
+    image: postgres:16-alpine
+    container_name: discord-saas-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: discord_saas
+      POSTGRES_PASSWORD: discord_saas_dev
+      POSTGRES_DB: discord_saas
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U discord_saas"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ── Redis (Development) ───────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: discord-saas-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ── API Server ────────────────────────────
+  api:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.api
+    container_name: discord-saas-api
+    restart: unless-stopped
+    ports:
+      - "4000:4000"
+    env_file:
+      - ../.env
+    environment:
+      DATABASE_URL: postgresql://discord_saas:discord_saas_dev@postgres:5432/discord_saas
+      REDIS_URL: redis://redis:6379
+      NODE_ENV: development
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ── Discord Bot ───────────────────────────
+  bot:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.bot
+    container_name: discord-saas-bot
+    restart: unless-stopped
+    env_file:
+      - ../.env
+    environment:
+      DATABASE_URL: postgresql://discord_saas:discord_saas_dev@postgres:5432/discord_saas
+      REDIS_URL: redis://redis:6379
+      NODE_ENV: development
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
+  redis_data:

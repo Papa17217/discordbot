@@ -1,0 +1,34 @@
+# Base image dla monorepo (Turborepo)
+FROM node:20-alpine AS base
+RUN apk add --no-cache libc6-compat
+RUN npm install -g pnpm turbo
+WORKDIR /app
+
+# Krok 1: Pruning workspace'u API
+FROM base AS pruner
+COPY . .
+RUN turbo prune --scope=@discord-saas/api --docker
+
+# Krok 2: Instalacja zależności
+FROM base AS installer
+COPY --from=pruner /app/out/json/ .
+COPY --from=pruner /app/out/pnpm-lock.yaml ./pnpm-lock.yaml
+# Instalacja zależności z użyciem pnpm
+RUN pnpm install --frozen-lockfile
+
+# Skopiowanie reszty kodu (tylko to, co jest potrzebne do builda API)
+COPY --from=pruner /app/out/full/ .
+# Generowanie klienta Prisma
+RUN pnpm --filter=@discord-saas/api prisma generate
+# Budowanie API
+RUN pnpm turbo run build --filter=@discord-saas/api
+
+# Krok 3: Uruchamianie (Production image)
+FROM node:20-alpine AS runner
+WORKDIR /app
+
+# Skopiowanie package.json i zbudowanych paczek
+COPY --from=installer /app .
+
+EXPOSE 4000
+CMD ["node", "apps/api/dist/main.js"]
