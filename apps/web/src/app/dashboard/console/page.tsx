@@ -21,8 +21,17 @@ export default function AdminConsolePage() {
   const socketRef = useRef<Socket | null>(null);
 
   useEffect(() => {
-    const socketUrl = process.env.NEXT_PUBLIC_WS_URL || (typeof window !== 'undefined' ? `${window.location.protocol}//${window.location.hostname}:4000/ws` : 'http://localhost:4000/ws');
+    // Automatyczne wykrywanie adresu: pierwszeństwo ma zmienna, potem aktualny host na porcie 4000
+    let socketUrl = process.env.NEXT_PUBLIC_WS_URL;
+    
+    if (!socketUrl && typeof window !== 'undefined') {
+      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      // Jeśli jesteśmy na porcie 3000, API prawdopodobnie jest na 4000
+      socketUrl = `${window.location.protocol}//${window.location.hostname}:4000/ws`;
+    }
+
     const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
+
 
     const socket = io(socketUrl, {
       auth: { token },
