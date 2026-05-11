@@ -73,54 +73,51 @@ const RoleSelector = ({ allRoles, selectedIds, onChange, label, icon: Icon }: an
 
         <AnimatePresence>
           {isOpen && (
-            <>
-              <div className="fixed inset-0 z-[60]" onClick={() => setIsOpen(false)} />
-              <motion.div 
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 10 }}
-                className="absolute left-0 right-0 top-full mt-2 bg-background-elevated border border-border rounded-xl shadow-2xl z-[70] max-h-64 overflow-hidden flex flex-col"
-              >
-
-                <div className="p-2 border-b border-border">
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-foreground-subtle" />
-                    <input 
-                      autoFocus
-                      type="text" 
-                      placeholder="Szukaj roli..."
-                      value={search}
-                      onChange={(e) => setSearch(e.target.value)}
-                      className="w-full bg-background-tertiary border border-border rounded-lg pl-9 pr-4 py-2 text-xs outline-none focus:border-accent"
-                    />
-                  </div>
+            <motion.div 
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className="mt-2 bg-background-tertiary border border-border rounded-xl overflow-hidden flex flex-col"
+            >
+              <div className="p-2 border-b border-border">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-foreground-subtle" />
+                  <input 
+                    autoFocus
+                    type="text" 
+                    placeholder="Szukaj roli..."
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    className="w-full bg-background-elevated border border-border rounded-lg pl-9 pr-4 py-2 text-xs outline-none focus:border-accent"
+                  />
                 </div>
-                <div className="overflow-y-auto p-1 custom-scrollbar">
-                  {filteredRoles.map((role: any) => {
-                    const isSelected = (selectedIds || []).includes(role.id);
-                    return (
-                      <div 
-                        key={role.id}
-                        onClick={() => {
-                          if (isSelected) onChange((selectedIds || []).filter((id: string) => id !== role.id));
-                          else onChange([...(selectedIds || []), role.id]);
-                        }}
-                        className={`flex items-center justify-between px-3 py-2 rounded-lg cursor-pointer transition-colors ${isSelected ? 'bg-accent/10 text-accent' : 'hover:bg-background-tertiary text-foreground-secondary'}`}
-                      >
-                        <div className="flex items-center gap-2">
-                          <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: role.color !== '#000000' ? role.color : '#6366f1' }} />
-                          <span className="text-xs font-medium">{role.name}</span>
-                        </div>
-                        {isSelected && <Check className="w-3.5 h-3.5" />}
+              </div>
+              <div className="max-h-48 overflow-y-auto p-1 custom-scrollbar">
+                {filteredRoles.map((role: any) => {
+                  const isSelected = (selectedIds || []).includes(role.id);
+                  return (
+                    <div 
+                      key={role.id}
+                      onClick={() => {
+                        if (isSelected) onChange((selectedIds || []).filter((id: string) => id !== role.id));
+                        else onChange([...(selectedIds || []), role.id]);
+                      }}
+                      className={`flex items-center justify-between px-3 py-2 rounded-lg cursor-pointer transition-colors ${isSelected ? 'bg-accent/10 text-accent' : 'hover:bg-background-elevated text-foreground-secondary'}`}
+                    >
+                      <div className="flex items-center gap-2">
+                        <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: role.color !== '#000000' ? role.color : '#6366f1' }} />
+                        <span className="text-xs font-medium">{role.name}</span>
                       </div>
-                    );
-                  })}
-                  {filteredRoles.length === 0 && <div className="p-4 text-center text-xs text-foreground-subtle">Nie znaleziono ról</div>}
-                </div>
-              </motion.div>
-            </>
+                      {isSelected && <Check className="w-3.5 h-3.5" />}
+                    </div>
+                  );
+                })}
+                {filteredRoles.length === 0 && <div className="p-4 text-center text-xs text-foreground-subtle">Nie znaleziono ról</div>}
+              </div>
+            </motion.div>
           )}
         </AnimatePresence>
+
       </div>
     </div>
   );
@@ -150,6 +147,8 @@ export default function EditTicketPanelPage() {
   const [image, setImage] = useState('');
   const [style, setStyle] = useState<'BUTTON' | 'SELECT'>('BUTTON');
   const [placeholder, setPlaceholder] = useState('Wybierz kategorię...');
+  const [maxButtons, setMaxButtons] = useState(5);
+  const [maxSelects, setMaxSelects] = useState(5);
   const [buttons, setButtons] = useState<ButtonConfig[]>([]);
 
   useEffect(() => {
@@ -159,10 +158,11 @@ export default function EditTicketPanelPage() {
 
   const loadData = async () => {
     try {
-      const [chanRes, roleRes, panelRes] = await Promise.all([
+      const [chanRes, roleRes, panelRes, configRes] = await Promise.all([
         api.get(`/guilds/${serverId}/channels`),
         api.get(`/guilds/${serverId}/roles`),
-        api.get(`/guilds/${serverId}/tickets/panels/${panelId}`)
+        api.get(`/guilds/${serverId}/tickets/panels/${panelId}`),
+        api.get('/admin/config').catch(() => ({ data: [] }))
       ]);
       
       const allChannels = chanRes.data.data || [];
@@ -185,6 +185,12 @@ export default function EditTicketPanelPage() {
         id: b.id || Math.random().toString(36).substr(2, 9),
       })));
 
+      const configs = configRes.data || [];
+      const mButtons = configs.find((c: any) => c.key === 'max_ticket_buttons')?.value;
+      const mSelects = configs.find((c: any) => c.key === 'max_ticket_selects')?.value;
+      if (mButtons) setMaxButtons(parseInt(mButtons));
+      if (mSelects) setMaxSelects(parseInt(mSelects));
+
 
     } catch (err) {
       toast.error('Błąd ładowania danych');
@@ -195,8 +201,9 @@ export default function EditTicketPanelPage() {
   };
 
   const addButton = () => {
-    if (buttons.length >= 5) {
-      toast.error('Maksymalnie 5 przycisków');
+    const currentLimit = style === 'BUTTON' ? maxButtons : maxSelects;
+    if (buttons.length >= currentLimit) {
+      toast.error(`Maksymalnie ${currentLimit} ${style === 'BUTTON' ? 'przycisków' : 'opcji'}`);
       return;
     }
     setButtons([...buttons, {

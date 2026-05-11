@@ -136,10 +136,10 @@ export function startBridge(client: BotClient) {
         if (embed.style === 'SELECT') {
           const { StringSelectMenuBuilder, StringSelectMenuOptionBuilder } = require('discord.js');
           const select = new StringSelectMenuBuilder()
-            .setCustomId(`ticket_select:${randomUUID()}`) // Unikalny ID dla menu
+            .setCustomId(`ticket_select:${randomUUID()}`)
             .setPlaceholder(embed.placeholder || 'Wybierz kategorię...')
             .addOptions(
-              buttons.map((btn: any) => {
+              buttons.slice(0, 25).map((btn: any) => {
                 const option = new StringSelectMenuOptionBuilder()
                   .setLabel(btn.label)
                   .setValue(btn.customId);
@@ -149,17 +149,20 @@ export function startBridge(client: BotClient) {
             );
           rows.push(new ActionRowBuilder().addComponents(select));
         } else {
-          const row = new ActionRowBuilder();
-          buttons.forEach((btn: any) => {
-            const button = new ButtonBuilder()
-              .setCustomId(btn.customId)
-              .setLabel(btn.label)
-              .setStyle(ButtonStyle[btn.style as keyof typeof ButtonStyle] || ButtonStyle.Primary);
-            
-            if (btn.emoji) button.setEmoji(btn.emoji);
-            row.addComponents(button);
-          });
-          rows.push(row);
+          // Split buttons into rows of 5 (Discord limit)
+          for (let i = 0; i < buttons.length; i += 5) {
+            const row = new ActionRowBuilder();
+            buttons.slice(i, i + 5).forEach((btn: any) => {
+              const button = new ButtonBuilder()
+                .setCustomId(btn.customId)
+                .setLabel(btn.label)
+                .setStyle(ButtonStyle[btn.style as keyof typeof ButtonStyle] || ButtonStyle.Primary);
+              
+              if (btn.emoji) button.setEmoji(btn.emoji);
+              row.addComponents(button);
+            });
+            rows.push(row);
+          }
         }
       }
 
@@ -219,7 +222,7 @@ export function startBridge(client: BotClient) {
             .setCustomId(`ticket_select:${randomUUID()}`)
             .setPlaceholder(embed.placeholder || 'Wybierz kategorię...')
             .addOptions(
-              buttons.map((btn: any) => {
+              buttons.slice(0, 25).map((btn: any) => {
                 const option = new StringSelectMenuOptionBuilder()
                   .setLabel(btn.label)
                   .setValue(btn.customId);
@@ -229,17 +232,20 @@ export function startBridge(client: BotClient) {
             );
           rows.push(new ActionRowBuilder().addComponents(select));
         } else {
-          const row = new ActionRowBuilder();
-          buttons.forEach((btn: any) => {
-            const button = new ButtonBuilder()
-              .setCustomId(btn.customId)
-              .setLabel(btn.label)
-              .setStyle(ButtonStyle[btn.style as keyof typeof ButtonStyle] || ButtonStyle.Primary);
-            
-            if (btn.emoji) button.setEmoji(btn.emoji);
-            row.addComponents(button);
-          });
-          rows.push(row);
+          // Split buttons into rows of 5 (Discord limit)
+          for (let i = 0; i < buttons.length; i += 5) {
+            const row = new ActionRowBuilder();
+            buttons.slice(i, i + 5).forEach((btn: any) => {
+              const button = new ButtonBuilder()
+                .setCustomId(btn.customId)
+                .setLabel(btn.label)
+                .setStyle(ButtonStyle[btn.style as keyof typeof ButtonStyle] || ButtonStyle.Primary);
+              
+              if (btn.emoji) button.setEmoji(btn.emoji);
+              row.addComponents(button);
+            });
+            rows.push(row);
+          }
         }
       }
 

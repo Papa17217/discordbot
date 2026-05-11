@@ -55,8 +55,10 @@ export function Sidebar() {
     // Dodaj Staff i Konsolę tylko dla OWNER/ADMIN w głównym menu
     if (!isServerPage && user && ['OWNER', 'ADMIN'].includes(user.role)) {
       baseLinks.splice(2, 0, { href: '/dashboard/admin/staff', label: 'Ekipa', icon: Shield });
-      baseLinks.splice(3, 0, { href: '/dashboard/console', label: 'Konsola', icon: Terminal });
+      baseLinks.splice(3, 0, { href: '/dashboard/admin/settings', label: 'Globalne', icon: Settings });
+      baseLinks.splice(4, 0, { href: '/dashboard/console', label: 'Konsola', icon: Terminal });
     }
+
 
     
     return baseLinks;

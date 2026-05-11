@@ -600,6 +600,18 @@ model FeatureFlag {
   @@map("feature_flags")
 }
 
+model GlobalConfig {
+  id          String  @id @default(cuid())
+  key         String  @unique
+  value       String
+  description String?
+
+  updatedAt DateTime @updatedAt
+
+  @@map("global_configs")
+}
+
+
 // ── Analytics ──────────────────────────────
 
 model AnalyticsEvent {

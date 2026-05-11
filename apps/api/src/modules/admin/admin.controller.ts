@@ -103,7 +103,31 @@ export class AdminController {
         mod: 'System',
         time: t.createdAt,
         color: 'text-blue-400'
-      }))
     };
   }
+
+  @Get('config')
+  @Roles(Role.OWNER, Role.ADMIN)
+  @ApiOperation({ summary: 'Pobierz ustawienia globalne' })
+  async getGlobalConfig() {
+    return this.prisma.globalConfig.findMany();
+  }
+
+  @Patch('config')
+  @Roles(Role.OWNER, Role.ADMIN)
+  @ApiOperation({ summary: 'Zaktualizuj ustawienia globalne' })
+  async updateGlobalConfig(
+    @Body() config: { key: string, value: string, description?: string }[]
+  ) {
+    const upserts = config.map(c => 
+      this.prisma.globalConfig.upsert({
+        where: { key: c.key },
+        update: { value: c.value, description: c.description },
+        create: { key: c.key, value: c.value, description: c.description },
+      })
+    );
+    await Promise.all(upserts);
+    return { success: true };
+  }
 }
+
