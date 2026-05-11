@@ -29,6 +29,17 @@ export default class ReadyEvent extends Event<'ready'> {
     // Synchronizuj guildy z bazą
     for (const [, guild] of client.guilds.cache) {
       try {
+        // 1. Upewnij się, że właściciel istnieje
+        await client.prisma.user.upsert({
+          where: { discordId: guild.ownerId },
+          update: {},
+          create: {
+            discordId: guild.ownerId,
+            username: 'Unknown Owner',
+          },
+        });
+
+        // 2. Synchronizuj serwer
         await client.prisma.guild.upsert({
           where: { discordId: guild.id },
           update: { name: guild.name, icon: guild.icon, memberCount: guild.memberCount },
@@ -42,6 +53,7 @@ export default class ReadyEvent extends Event<'ready'> {
           },
         });
       } catch (error) {
+
         logger.error(`Błąd synchronizacji ${guild.name}:`, error);
       }
     }
