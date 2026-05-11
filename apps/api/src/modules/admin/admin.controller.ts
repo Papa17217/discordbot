@@ -103,8 +103,10 @@ export class AdminController {
         mod: 'System',
         time: t.createdAt,
         color: 'text-blue-400'
+      }))
     };
   }
+
 
   @Get('config')
   @Roles(Role.OWNER, Role.ADMIN)
