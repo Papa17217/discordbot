@@ -55,11 +55,12 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
       this.connectedUsers.set(client.id, payload.sub);
       console.log(`🔌 WebSocket: ${payload.username} połączony (${client.id})`);
-    } catch (err) {
-      console.error(`❌ Błąd autoryzacji WebSocket dla ${client.id}:`, err.message);
+    } catch (err: any) {
+      console.error(`❌ Błąd autoryzacji WebSocket dla ${client.id}:`, err?.message || 'Nieznany błąd');
       // client.disconnect(); // Tymczasowo wyłączone dla testu
     }
   }
+
 
 
   handleDisconnect(client: Socket) {
