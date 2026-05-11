@@ -23,7 +23,8 @@ export default function GlobalSettingsPage() {
   const fetchConfig = async () => {
     try {
       setLoading(true);
-      const data = await api.get('/admin/config');
+      const res = await api.get('/admin/config');
+      const data = res.data || [];
       
       // Default values if not present
       const defaultConfigs = [
@@ -33,6 +34,7 @@ export default function GlobalSettingsPage() {
 
       const merged = defaultConfigs.map(def => {
         const found = data.find((d: any) => d.key === def.key);
+
         return found ? { ...def, value: found.value, description: found.description || def.description } : def;
       });
 
