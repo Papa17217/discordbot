@@ -49,20 +49,51 @@ async function handleCloseAction(client: BotClient, interaction: ButtonInteracti
   const channel = interaction.channel;
   if (!channel || !channel.isTextBased()) return;
 
-  await interaction.reply({ content: '🔒 Ticket zostanie zamknięty za 5 sekund...', flags: [MessageFlags.Ephemeral] });
+  await interaction.reply({ content: '🔒 Ticket zostanie zamknięty i zarchiwizowany za 5 sekund...', flags: [MessageFlags.Ephemeral] });
   
   setTimeout(async () => {
     try {
-      await channel.delete();
-      await client.prisma.ticket.update({
+      // 1. Znajdź ticket w bazie
+      const ticket = await client.prisma.ticket.findUnique({
         where: { channelId: channel.id },
-        data: { status: 'CLOSED', closedAt: new Date() },
       });
+
+      if (ticket) {
+        // 2. Pobierz historię wiadomości (limit 100 dla wydajności, można zwiększyć)
+        const messages = await (channel as any).messages.fetch({ limit: 100 });
+        const transcriptData = messages
+          .reverse() // chronologicznie
+          .map((m: any) => ({
+            author: m.author.username,
+            content: m.content,
+            timestamp: m.createdAt,
+            avatar: m.author.displayAvatarURL(),
+            isBot: m.author.bot,
+          }));
+
+        // 3. Zapisz transkrypcję
+        await client.prisma.ticketTranscript.create({
+          data: {
+            ticketId: ticket.id,
+            messages: transcriptData as any,
+          },
+        });
+
+        // 4. Zaktualizuj status ticketu
+        await client.prisma.ticket.update({
+          where: { id: ticket.id },
+          data: { status: 'CLOSED', closedAt: new Date() },
+        });
+      }
+
+      // 5. Usuń kanał
+      await channel.delete();
     } catch (err) {
-      logger.error(`Błąd zamykania kanału: ${err}`);
+      logger.error(`Błąd archiwizacji/zamykania kanału: ${err}`);
     }
   }, 5000);
 }
+
 
 async function handleStaffAction(client: BotClient, interaction: ButtonInteraction) {
   const channel = interaction.channel;

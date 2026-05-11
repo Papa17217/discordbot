@@ -7,8 +7,13 @@ export class TicketsService {
 
   async getTickets(guildId: string, status?: string) {
     return this.prisma.ticket.findMany({
-      where: { guildId, ...(status && { status: status as any }) },
-      include: { user: { select: { username: true, avatar: true, discordId: true } } },
+      where: { 
+        guildId, 
+        ...(status && { status: status as any }) 
+      },
+      include: { 
+        user: { select: { username: true, avatar: true, discordId: true } } 
+      },
       orderBy: { createdAt: 'desc' },
     });
   }
@@ -16,11 +21,15 @@ export class TicketsService {
   async getTicket(ticketId: string) {
     const ticket = await this.prisma.ticket.findUnique({
       where: { id: ticketId },
-      include: { user: { select: { username: true, avatar: true } } },
+      include: { 
+        user: { select: { username: true, avatar: true, discordId: true } },
+        transcript: true
+      },
     });
     if (!ticket) throw new NotFoundException('Ticket nie znaleziony');
     return ticket;
   }
+
 
   async closeTicket(ticketId: string) {
     return this.prisma.ticket.update({

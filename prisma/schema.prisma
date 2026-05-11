@@ -348,6 +348,8 @@ model Ticket {
   staffRoleIds String[] @default([])
   staffMessage String? @default("Administracja potrzebna natychmiast!")
 
+  transcript  TicketTranscript?
+
   createdAt DateTime  @default(now())
   closedAt  DateTime?
 
@@ -355,6 +357,20 @@ model Ticket {
   @@index([userId])
   @@map("tickets")
 }
+
+model TicketTranscript {
+  id        String   @id @default(cuid())
+  ticketId  String   @unique
+  ticket    Ticket   @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  
+  // Przechowujemy listę wiadomości jako JSON: [{author, content, timestamp, avatar, isBot}]
+  messages  Json     
+  
+  createdAt DateTime @default(now())
+
+  @@map("ticket_transcripts")
+}
+
 
 model TicketPanel {
   id          String   @id @default(cuid())
