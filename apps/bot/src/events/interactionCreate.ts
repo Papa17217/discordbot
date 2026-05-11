@@ -49,8 +49,11 @@ export default class InteractionCreateEvent extends Event<'interactionCreate'> {
     }
 
     // ── Execute Command ──────────────────────
+    logger.info(`⌨️ Komenda /${interaction.commandName} użyta przez ${interaction.user.tag} na serwerze ${interaction.guild?.name || 'DM'}`);
+
     try {
       await command.execute(interaction, client);
+
 
       // Zapisz użycie komendy w analytics
       if (interaction.guildId) {
