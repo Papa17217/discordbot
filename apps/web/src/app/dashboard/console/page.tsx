@@ -1,7 +1,9 @@
 'use client';
 import { useEffect, useState, useRef } from 'react';
+import Link from 'next/link';
 import { io, Socket } from 'socket.io-client';
-import { Terminal, Shield, Trash2, Loader2, Circle, AlertCircle, RefreshCcw, Layout, Monitor } from 'lucide-react';
+import { Terminal, Shield, Trash2, Loader2, Circle, AlertCircle, RefreshCcw, Layout, Monitor, ChevronLeft } from 'lucide-react';
+
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuthStore } from '@/stores/authStore';
 import { cn } from '@/lib/utils';
@@ -155,6 +157,11 @@ export default function AdminConsolePage() {
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6 max-w-6xl mx-auto">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
+          <div className="flex items-center gap-2 mb-1">
+            <Link href="/dashboard/servers" className="text-xs text-foreground-subtle hover:text-accent transition-colors flex items-center gap-1 group">
+              <ChevronLeft className="w-3 h-3 group-hover:-translate-x-0.5 transition-transform" /> Powrót do serwerów
+            </Link>
+          </div>
           <h1 className="text-2xl font-bold flex items-center gap-3">
             <Terminal className="w-7 h-7 text-accent" /> Konsola Systemowa
           </h1>
@@ -169,6 +176,7 @@ export default function AdminConsolePage() {
             </span>
           </p>
         </div>
+
 
         <div className="flex items-center gap-2 bg-background-secondary p-1 rounded-xl border border-border">
           <button

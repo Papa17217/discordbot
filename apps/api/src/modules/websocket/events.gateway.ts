@@ -120,29 +120,43 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     const userId = this.connectedUsers.get(client.id);
     if (!userId) return;
 
-    if (this.ptyProcesses.has(client.id)) return;
+    console.log(`🔌 Próba otwarcia terminala dla użytkownika ${userId} (socket: ${client.id})`);
 
-    const shell = os.platform() === 'win32' ? 'powershell.exe' : 'bash';
-    const ptyProcess = pty.spawn(shell, [], {
-      name: 'xterm-color',
-      cols: 80,
-      rows: 24,
-      cwd: process.env.HOME || process.cwd(),
-      env: process.env as any,
-    });
+    if (this.ptyProcesses.has(client.id)) {
+      console.log(`⚠️ Użytkownik ${client.id} ma już aktywny terminal.`);
+      return;
+    }
 
-    ptyProcess.onData((data) => {
-      client.emit('terminal:output', data);
-    });
+    try {
+      const shell = os.platform() === 'win32' ? 'powershell.exe' : 'bash';
+      console.log(`🐚 Spawning shell: ${shell}`);
 
-    ptyProcess.onExit(() => {
-      this.ptyProcesses.delete(client.id);
-      client.emit('terminal:output', '\r\n[Proces terminala zakończony]\r\n');
-    });
+      const ptyProcess = pty.spawn(shell, [], {
+        name: 'xterm-color',
+        cols: 80,
+        rows: 24,
+        cwd: process.env.HOME || process.cwd(),
+        env: process.env as any,
+      });
 
-    this.ptyProcesses.set(client.id, ptyProcess);
-    console.log(`💻 Terminal otwarty dla ${client.id}`);
+      ptyProcess.onData((data) => {
+        client.emit('terminal:output', data);
+      });
+
+      ptyProcess.onExit(({ exitCode, signal }) => {
+        console.log(`📉 Proces terminala dla ${client.id} zakończony (kod: ${exitCode}, sygnał: ${signal})`);
+        this.ptyProcesses.delete(client.id);
+        client.emit('terminal:output', '\r\n[Proces terminala zakończony]\r\n');
+      });
+
+      this.ptyProcesses.set(client.id, ptyProcess);
+      console.log(`✅ Terminal pomyślnie otwarty dla ${client.id}`);
+    } catch (err: any) {
+      console.error(`❌ Błąd podczas otwierania terminala dla ${client.id}:`, err.message);
+      client.emit('terminal:output', `\r\n[BŁĄD SYSTEMOWY]: Nie można uruchomić terminala: ${err.message}\r\n`);
+    }
   }
+
 
   @SubscribeMessage('terminal:input')
   handleTerminalInput(@ConnectedSocket() client: Socket, @MessageBody() data: string) {
