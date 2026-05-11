@@ -74,13 +74,14 @@ const RoleSelector = ({ allRoles, selectedIds, onChange, label, icon: Icon }: an
         <AnimatePresence>
           {isOpen && (
             <>
-              <div className="fixed inset-0 z-10" onClick={() => setIsOpen(false)} />
+              <div className="fixed inset-0 z-[60]" onClick={() => setIsOpen(false)} />
               <motion.div 
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 10 }}
-                className="absolute left-0 right-0 top-full mt-2 bg-background-elevated border border-border rounded-xl shadow-2xl z-20 max-h-64 overflow-hidden flex flex-col"
+                className="absolute left-0 right-0 top-full mt-2 bg-background-elevated border border-border rounded-xl shadow-2xl z-[70] max-h-64 overflow-hidden flex flex-col"
               >
+
                 <div className="p-2 border-b border-border">
                   <div className="relative">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-foreground-subtle" />
