@@ -5,6 +5,9 @@ import { BotService } from '../bot/bot.service';
 import { Roles } from '../../common/decorators';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { Role } from '@prisma/client';
+import { EventsGateway } from '../websocket/events.gateway';
+import { Post, Headers, UnauthorizedException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 
 @ApiTags('admin')
 @ApiBearerAuth()
@@ -14,7 +17,25 @@ export class AdminController {
   constructor(
     private prisma: PrismaService,
     private botService: BotService,
+    private eventsGateway: EventsGateway,
+    private config: ConfigService,
   ) {}
+
+  @Post('logs')
+  @ApiOperation({ summary: 'Przyjmij logi z bota (tylko dla bota)' })
+  async ingestLogs(
+    @Body() log: { level: string; message: string; timestamp: string },
+    @Headers('x-bot-token') token: string,
+  ) {
+    // Prosta weryfikacja czy to na pewno bot
+    if (token !== this.config.get('DISCORD_TOKEN')) {
+      throw new UnauthorizedException('Błędny token bota');
+    }
+
+    this.eventsGateway.emitLog(log);
+    return { success: true };
+  }
+
 
   @Get('users')
   @Roles(Role.OWNER, Role.ADMIN)

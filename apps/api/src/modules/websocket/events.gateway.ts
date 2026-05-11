@@ -78,7 +78,26 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     client.leave(`guild:${guildId}`);
   }
 
+  @SubscribeMessage('admin:join')
+  async handleJoinAdmin(@ConnectedSocket() client: Socket) {
+    const userId = this.connectedUsers.get(client.id);
+    if (!userId) return;
+
+    // Można dodać sprawdzanie roli w bazie tutaj, dla bezpieczeństwa
+    client.join('admin:logs');
+    console.log(`🛡️ Admin ${client.id} dołączył do konsoli logów`);
+  }
+
+  @SubscribeMessage('admin:leave')
+  handleLeaveAdmin(@ConnectedSocket() client: Socket) {
+    client.leave('admin:logs');
+  }
+
   // ── Emit Events (wywoływane z serwisów) ────
+
+  emitLog(data: { level: string; message: string; timestamp: string }) {
+    this.server.to('admin:logs').emit('admin:log', data);
+  }
 
   emitToGuild(guildId: string, event: string, data: any) {
     this.server.to(`guild:${guildId}`).emit(event, data);
