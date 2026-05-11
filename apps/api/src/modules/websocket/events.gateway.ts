@@ -166,9 +166,11 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
   handleTerminalInput(@ConnectedSocket() client: Socket, @MessageBody() data: string) {
     const ptyProcess = this.ptyProcesses.get(client.id);
     if (ptyProcess) {
+      // console.log(`⌨️ Terminal input od ${client.id}: ${data.replace(/\n/g, '\\n')}`);
       ptyProcess.write(data);
     }
   }
+
 
   @SubscribeMessage('terminal:resize')
   handleTerminalResize(@ConnectedSocket() client: Socket, @MessageBody() size: { cols: number; rows: number }) {

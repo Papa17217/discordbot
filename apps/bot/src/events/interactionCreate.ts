@@ -27,6 +27,14 @@ export default class InteractionCreateEvent extends Event<'interactionCreate'> {
         return handleReactionRoleButton(client, interaction);
       }
     }
+    
+    if (interaction.isStringSelectMenu()) {
+      if (interaction.customId.startsWith('ticket_select:')) {
+        const { handleTicketSelect } = require('../handlers/ticketHandler');
+        return handleTicketSelect(client, interaction);
+      }
+    }
+
 
     if (!interaction.isChatInputCommand()) return;
 

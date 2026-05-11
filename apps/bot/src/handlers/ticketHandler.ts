@@ -1,4 +1,4 @@
-import { ButtonInteraction, ActionRowBuilder, ButtonBuilder, ButtonStyle, ChannelType, PermissionFlagsBits, EmbedBuilder, MessageFlags } from 'discord.js';
+import { ButtonInteraction, ActionRowBuilder, ButtonBuilder, ButtonStyle, ChannelType, PermissionFlagsBits, EmbedBuilder, MessageFlags, StringSelectMenuInteraction } from 'discord.js';
 import type { BotClient } from '../client';
 import { logger } from '../utils/logger';
 
@@ -16,6 +16,15 @@ export async function handleTicketButton(client: BotClient, interaction: ButtonI
     return handleLegacyCreateTicket(client, interaction);
   }
 
+  await processTicketAction(client, interaction, customId);
+}
+
+export async function handleTicketSelect(client: BotClient, interaction: StringSelectMenuInteraction) {
+  const customId = interaction.values[0];
+  await processTicketAction(client, interaction, customId);
+}
+
+async function processTicketAction(client: BotClient, interaction: ButtonInteraction | StringSelectMenuInteraction, customId: string) {
   const button = await client.prisma.ticketButton.findUnique({
     where: { customId },
     include: { panel: true },
@@ -125,7 +134,7 @@ async function handleStaffAction(client: BotClient, interaction: ButtonInteracti
   });
 }
 
-async function handleOpenTicket(client: BotClient, interaction: ButtonInteraction, button: any) {
+async function handleOpenTicket(client: BotClient, interaction: ButtonInteraction | StringSelectMenuInteraction, button: any) {
   const guild = interaction.guild;
   if (!guild) return;
 
@@ -227,7 +236,7 @@ async function handleOpenTicket(client: BotClient, interaction: ButtonInteractio
   }
 }
 
-async function handleAddRole(client: BotClient, interaction: ButtonInteraction, button: any) {
+async function handleAddRole(client: BotClient, interaction: ButtonInteraction | StringSelectMenuInteraction, button: any) {
   const member = interaction.member;
   if (!member || !('roles' in member)) return;
   const rolesToAdd = button.addRoleIds;
@@ -242,7 +251,7 @@ async function handleAddRole(client: BotClient, interaction: ButtonInteraction, 
   }
 }
 
-async function handleSendMessage(client: BotClient, interaction: ButtonInteraction, button: any) {
+async function handleSendMessage(client: BotClient, interaction: ButtonInteraction | StringSelectMenuInteraction, button: any) {
   if (!button.message) return;
   if (!interaction.deferred && !interaction.replied) {
     await interaction.reply({ content: button.message, flags: [MessageFlags.Ephemeral] });

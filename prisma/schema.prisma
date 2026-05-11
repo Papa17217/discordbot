@@ -385,8 +385,11 @@ model TicketPanel {
   footer      String?
   image       String?
   thumbnail   String?
+  style       String   @default("BUTTON") // BUTTON or SELECT
+  placeholder String?  @default("Wybierz kategorię...")
 
   buttons     TicketButton[]
+
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt

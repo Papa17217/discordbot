@@ -174,12 +174,21 @@ export default function AdminConsolePage() {
   const clearLogs = () => setLogs([]);
 
   const runQuickCommand = (cmd: string) => {
-    if (activeTab !== 'terminal') setActiveTab('terminal');
-    // Mały delay żeby terminal zdążył się przełączyć
+    console.log(`⌨️ Próba wykonania szybkiej komendy: ${cmd}`);
+    if (activeTab !== 'terminal') {
+      setActiveTab('terminal');
+    }
+    
+    // Zwiększony delay, żeby terminal na pewno był gotowy
     setTimeout(() => {
-      socketRef.current?.emit('terminal:input', cmd + '\n');
-    }, 200);
+      if (socketRef.current && isConnected) {
+        socketRef.current.emit('terminal:input', cmd + '\n');
+      } else {
+        console.error('❌ Nie można wysłać komendy: brak połączenia');
+      }
+    }, 500);
   };
+
 
   const quickActions = [
     { label: 'Full Update', cmd: 'cd ~/discordbot && git pull && pnpm install && pnpm build && pm2 restart all', icon: RefreshCcw, color: 'text-emerald-400' },

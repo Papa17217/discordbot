@@ -145,6 +145,8 @@ export default function NewTicketPanelPage() {
   const [footer, setFooter] = useState('');
   const [thumbnail, setThumbnail] = useState('');
   const [image, setImage] = useState('');
+  const [style, setStyle] = useState<'BUTTON' | 'SELECT'>('BUTTON');
+  const [placeholder, setPlaceholder] = useState('Wybierz kategorię...');
 
   const [buttons, setButtons] = useState<ButtonConfig[]>([
     {
@@ -169,6 +171,7 @@ export default function NewTicketPanelPage() {
       categoryId: ''
     }
   ]);
+
 
   useEffect(() => {
     if (!serverId) return;
@@ -243,8 +246,9 @@ export default function NewTicketPanelPage() {
     }
     setIsSubmitting(true);
     try {
-      await api.post(`/guilds/${serverId}/tickets/panels`, { channelId, title, description, color, footer, thumbnail, image, buttons });
+      await api.post(`/guilds/${serverId}/tickets/panels`, { channelId, title, description, color, footer, thumbnail, image, buttons, style, placeholder });
       toast.success('Panel wysłany!');
+
       router.push(`/dashboard/servers/${serverId}/tickets`);
     } catch (err) {
       toast.error('Błąd tworzenia panelu');
@@ -286,7 +290,7 @@ export default function NewTicketPanelPage() {
               <Layout className="w-4 h-4" /> Stylistyka Wiadomości Głównej (Panelu)
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="space-y-2">
                 <label className="text-[10px] font-bold text-foreground-subtle uppercase">Kanał Docelowy</label>
                 <select value={channelId} onChange={(e) => setChannelId(e.target.value)} className="w-full bg-background-tertiary border border-border rounded-xl px-4 py-2.5 text-sm outline-none cursor-pointer">
@@ -300,7 +304,22 @@ export default function NewTicketPanelPage() {
                   <input type="text" value={color} onChange={(e) => setColor(e.target.value)} className="flex-1 bg-background-tertiary border border-border rounded-xl px-4 py-2.5 text-sm font-mono" />
                 </div>
               </div>
+              <div className="space-y-2">
+                <label className="text-[10px] font-bold text-foreground-subtle uppercase">Styl Komponentów</label>
+                <div className="flex bg-background-tertiary p-1 rounded-xl border border-border">
+                   <button onClick={() => setStyle('BUTTON')} className={`flex-1 py-1.5 rounded-lg text-[10px] font-bold transition-all ${style === 'BUTTON' ? 'bg-accent text-white shadow-lg' : 'text-foreground-secondary hover:text-foreground'}`}>PRZYCISKI</button>
+                   <button onClick={() => setStyle('SELECT')} className={`flex-1 py-1.5 rounded-lg text-[10px] font-bold transition-all ${style === 'SELECT' ? 'bg-accent text-white shadow-lg' : 'text-foreground-secondary hover:text-foreground'}`}>LISTA</button>
+                </div>
+              </div>
             </div>
+
+            {style === 'SELECT' && (
+              <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="space-y-2">
+                <label className="text-[10px] font-bold text-emerald-400 uppercase">Tekst na liście (Placeholder)</label>
+                <input type="text" value={placeholder} onChange={(e) => setPlaceholder(e.target.value)} placeholder="Np. Wybierz powód zgłoszenia..." className="w-full bg-background-tertiary border border-emerald-500/20 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-emerald-500" />
+              </motion.div>
+            )}
+
 
             <div className="space-y-4">
               <div className="space-y-2">
@@ -551,12 +570,21 @@ export default function NewTicketPanelPage() {
                           {image && <div className="px-3.5 pb-3.5"><img src={image} alt="" className="rounded-[4px] w-full" /></div>}
                           {footer && <div className="px-3.5 pb-3.5 text-[11px] text-[#dbdee1] font-medium">{footer}</div>}
                        </div>
-                       <div className="flex flex-wrap gap-2.5">
-                          {buttons.map(btn => (
-                            <div key={btn.id} className={`px-3.5 py-2 rounded-[3px] text-white text-[14px] font-medium flex items-center gap-2 cursor-pointer ${btn.style === 'PRIMARY' ? 'bg-[#5865f2]' : btn.style === 'SUCCESS' ? 'bg-[#248046]' : btn.style === 'DANGER' ? 'bg-[#da373c]' : 'bg-[#4e5058]'}`}>
-                              {btn.emoji} {btn.label}
+                       <div className="flex flex-wrap gap-2.5 w-full">
+                          {style === 'BUTTON' ? (
+                            buttons.map(btn => (
+                              <div key={btn.id} className={`px-3.5 py-2 rounded-[3px] text-white text-[14px] font-medium flex items-center gap-2 cursor-pointer ${btn.style === 'PRIMARY' ? 'bg-[#5865f2]' : btn.style === 'SUCCESS' ? 'bg-[#248046]' : btn.style === 'DANGER' ? 'bg-[#da373c]' : 'bg-[#4e5058]'}`}>
+                                {btn.emoji} {btn.label}
+                              </div>
+                            ))
+                          ) : (
+                            <div className="w-full bg-[#1e1f22] border border-black/20 rounded-[4px] p-2 flex items-center justify-between text-[#949ba4] text-[14px] cursor-pointer hover:bg-[#35373c] transition-colors group">
+                               <div className="flex items-center gap-2">
+                                  <span className="group-hover:text-[#dbdee1]">{placeholder || 'Wybierz kategorię...'}</span>
+                               </div>
+                               <ChevronDown className="w-4 h-4" />
                             </div>
-                          ))}
+                          )}
                        </div>
                     </div>
                   ) : (

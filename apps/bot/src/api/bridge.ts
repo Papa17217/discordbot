@@ -3,6 +3,7 @@
 // ============================================
 
 import express from 'express';
+import { randomUUID } from 'crypto';
 import type { BotClient } from '../client';
 import { logger } from '../utils/logger';
 
@@ -132,23 +133,41 @@ export function startBridge(client: BotClient) {
 
       const rows = [];
       if (buttons && buttons.length > 0) {
-        const row = new ActionRowBuilder();
-        buttons.forEach((btn: any) => {
-          const button = new ButtonBuilder()
-            .setCustomId(btn.customId)
-            .setLabel(btn.label)
-            .setStyle(ButtonStyle[btn.style as keyof typeof ButtonStyle] || ButtonStyle.Primary);
-          
-          if (btn.emoji) button.setEmoji(btn.emoji);
-          row.addComponents(button);
-        });
-        rows.push(row);
+        if (embed.style === 'SELECT') {
+          const { StringSelectMenuBuilder, StringSelectMenuOptionBuilder } = require('discord.js');
+          const select = new StringSelectMenuBuilder()
+            .setCustomId(`ticket_select:${randomUUID()}`) // Unikalny ID dla menu
+            .setPlaceholder(embed.placeholder || 'Wybierz kategorię...')
+            .addOptions(
+              buttons.map((btn: any) => {
+                const option = new StringSelectMenuOptionBuilder()
+                  .setLabel(btn.label)
+                  .setValue(btn.customId);
+                if (btn.emoji) option.setEmoji(btn.emoji);
+                return option;
+              })
+            );
+          rows.push(new ActionRowBuilder().addComponents(select));
+        } else {
+          const row = new ActionRowBuilder();
+          buttons.forEach((btn: any) => {
+            const button = new ButtonBuilder()
+              .setCustomId(btn.customId)
+              .setLabel(btn.label)
+              .setStyle(ButtonStyle[btn.style as keyof typeof ButtonStyle] || ButtonStyle.Primary);
+            
+            if (btn.emoji) button.setEmoji(btn.emoji);
+            row.addComponents(button);
+          });
+          rows.push(row);
+        }
       }
 
       const message = await (channel as any).send({
         embeds: [discordEmbed],
         components: rows,
       });
+
 
       res.json({ success: true, messageId: message.id });
     } catch (error: any) {
@@ -194,23 +213,41 @@ export function startBridge(client: BotClient) {
 
       const rows = [];
       if (buttons && buttons.length > 0) {
-        const row = new ActionRowBuilder();
-        buttons.forEach((btn: any) => {
-          const button = new ButtonBuilder()
-            .setCustomId(btn.customId)
-            .setLabel(btn.label)
-            .setStyle(ButtonStyle[btn.style as keyof typeof ButtonStyle] || ButtonStyle.Primary);
-          
-          if (btn.emoji) button.setEmoji(btn.emoji);
-          row.addComponents(button);
-        });
-        rows.push(row);
+        if (embed.style === 'SELECT') {
+          const { StringSelectMenuBuilder, StringSelectMenuOptionBuilder } = require('discord.js');
+          const select = new StringSelectMenuBuilder()
+            .setCustomId(`ticket_select:${randomUUID()}`)
+            .setPlaceholder(embed.placeholder || 'Wybierz kategorię...')
+            .addOptions(
+              buttons.map((btn: any) => {
+                const option = new StringSelectMenuOptionBuilder()
+                  .setLabel(btn.label)
+                  .setValue(btn.customId);
+                if (btn.emoji) option.setEmoji(btn.emoji);
+                return option;
+              })
+            );
+          rows.push(new ActionRowBuilder().addComponents(select));
+        } else {
+          const row = new ActionRowBuilder();
+          buttons.forEach((btn: any) => {
+            const button = new ButtonBuilder()
+              .setCustomId(btn.customId)
+              .setLabel(btn.label)
+              .setStyle(ButtonStyle[btn.style as keyof typeof ButtonStyle] || ButtonStyle.Primary);
+            
+            if (btn.emoji) button.setEmoji(btn.emoji);
+            row.addComponents(button);
+          });
+          rows.push(row);
+        }
       }
 
       await message.edit({
         embeds: [discordEmbed],
         components: rows,
       });
+
 
       res.json({ success: true });
     } catch (error: any) {

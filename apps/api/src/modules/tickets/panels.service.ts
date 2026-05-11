@@ -30,7 +30,7 @@ export class PanelsService {
   }
 
   async createPanel(guildId: string, data: any) {
-    const { title, description, color, footer, thumbnail, image, channelId, buttons } = data;
+    const { title, description, color, footer, thumbnail, image, channelId, buttons, style, placeholder } = data;
 
     const panel = await this.prisma.ticketPanel.create({
       data: {
@@ -42,6 +42,8 @@ export class PanelsService {
         footer,
         thumbnail,
         image,
+        style: style || 'BUTTON',
+        placeholder: placeholder || 'Wybierz kategorię...',
         buttons: {
           create: buttons.map((btn: any) => ({
             label: btn.label,
@@ -84,6 +86,8 @@ export class PanelsService {
         footer: panel.footer,
         thumbnail: panel.thumbnail,
         image: panel.image,
+        style: panel.style,
+        placeholder: panel.placeholder,
       }, panel.buttons) as any;
 
       await this.prisma.ticketPanel.update({
@@ -99,7 +103,7 @@ export class PanelsService {
   }
 
   async updatePanel(panelId: string, data: any) {
-    const { title, description, color, footer, thumbnail, image, channelId, buttons } = data;
+    const { title, description, color, footer, thumbnail, image, channelId, buttons, style, placeholder } = data;
 
     // 1. Znajdź stary panel
     const existing = await this.prisma.ticketPanel.findUnique({
@@ -119,6 +123,8 @@ export class PanelsService {
         thumbnail,
         image,
         channelId,
+        style: style || 'BUTTON',
+        placeholder: placeholder || 'Wybierz kategorię...',
         buttons: {
           deleteMany: {},
           create: buttons.map((btn: any) => ({
@@ -160,7 +166,7 @@ export class PanelsService {
             guild.discordId,
             updated.channelId,
             updated.messageId,
-            { title, description, color, footer, thumbnail, image },
+            { title, description, color, footer, thumbnail, image, style: updated.style, placeholder: updated.placeholder },
             updated.buttons
           );
         }
@@ -171,6 +177,7 @@ export class PanelsService {
 
     return updated;
   }
+
 
   async deletePanel(panelId: string) {
     const panel = await this.prisma.ticketPanel.findUnique({ where: { id: panelId } });
