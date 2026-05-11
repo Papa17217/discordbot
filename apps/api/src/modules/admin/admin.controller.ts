@@ -2,7 +2,7 @@ import { Controller, Get, Patch, Body, Param, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { PrismaService } from '../../prisma/prisma.service';
 import { BotService } from '../bot/bot.service';
-import { Roles } from '../../common/decorators';
+import { Roles, Public } from '../../common/decorators';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { Role } from '@prisma/client';
 import { EventsGateway } from '../websocket/events.gateway';
@@ -21,9 +21,11 @@ export class AdminController {
     private config: ConfigService,
   ) {}
 
+  @Public()
   @Post('logs')
   @ApiOperation({ summary: 'Przyjmij logi z bota (tylko dla bota)' })
   async ingestLogs(
+
     @Body() log: { level: string; message: string; timestamp: string },
     @Headers('x-bot-token') token: string,
   ) {
