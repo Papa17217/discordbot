@@ -123,7 +123,9 @@ export default function AdminConsolePage() {
         window.removeEventListener('resize', handleResize);
       };
     }
+    return () => {};
   }, [activeTab]);
+
 
   useEffect(() => {
     if (activeTab === 'logs' && scrollRef.current) {
