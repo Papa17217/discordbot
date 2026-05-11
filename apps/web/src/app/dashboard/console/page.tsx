@@ -30,7 +30,17 @@ export default function AdminConsolePage() {
       socketUrl = `${window.location.protocol}//${window.location.hostname}:4000/ws`;
     }
 
-    const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
+    const authStorage = typeof window !== 'undefined' ? localStorage.getItem('discord-saas-auth') : null;
+    let token = null;
+    if (authStorage) {
+      try {
+        const parsed = JSON.parse(authStorage);
+        token = parsed.state?.accessToken;
+      } catch (e) {
+        console.error('Błąd parsowania auth storage', e);
+      }
+    }
+
 
 
     const socket = io(socketUrl, {
