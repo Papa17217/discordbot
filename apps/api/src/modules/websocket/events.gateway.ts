@@ -14,6 +14,9 @@ import {
 import { Server, Socket } from 'socket.io';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
+import * as pty from 'node-pty';
+import * as os from 'os';
+
 
 @WebSocketGateway({
   cors: {
@@ -28,6 +31,8 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
   server!: Server;
 
   private connectedUsers = new Map<string, string>(); // socketId -> userId
+  private ptyProcesses = new Map<string, pty.IPty>();
+
 
   constructor(
     private jwtService: JwtService,
@@ -66,10 +71,19 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
   handleDisconnect(client: Socket) {
     const userId = this.connectedUsers.get(client.id);
     this.connectedUsers.delete(client.id);
+
+    // Zabij proces terminala przy rozłączeniu
+    const ptyProcess = this.ptyProcesses.get(client.id);
+    if (ptyProcess) {
+      ptyProcess.kill();
+      this.ptyProcesses.delete(client.id);
+    }
+
     if (userId) {
       console.log(`🔌 WebSocket: rozłączono (${client.id})`);
     }
   }
+
 
   // ── Subskrypcja do pokoju serwera ──────────
 
@@ -98,6 +112,54 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
   handleLeaveAdmin(@ConnectedSocket() client: Socket) {
     client.leave('admin:logs');
   }
+
+  // ── Terminal Systemowy ──────────────────────
+
+  @SubscribeMessage('terminal:join')
+  async handleJoinTerminal(@ConnectedSocket() client: Socket) {
+    const userId = this.connectedUsers.get(client.id);
+    if (!userId) return;
+
+    if (this.ptyProcesses.has(client.id)) return;
+
+    const shell = os.platform() === 'win32' ? 'powershell.exe' : 'bash';
+    const ptyProcess = pty.spawn(shell, [], {
+      name: 'xterm-color',
+      cols: 80,
+      rows: 24,
+      cwd: process.env.HOME || process.cwd(),
+      env: process.env as any,
+    });
+
+    ptyProcess.onData((data) => {
+      client.emit('terminal:output', data);
+    });
+
+    ptyProcess.onExit(() => {
+      this.ptyProcesses.delete(client.id);
+      client.emit('terminal:output', '\r\n[Proces terminala zakończony]\r\n');
+    });
+
+    this.ptyProcesses.set(client.id, ptyProcess);
+    console.log(`💻 Terminal otwarty dla ${client.id}`);
+  }
+
+  @SubscribeMessage('terminal:input')
+  handleTerminalInput(@ConnectedSocket() client: Socket, @MessageBody() data: string) {
+    const ptyProcess = this.ptyProcesses.get(client.id);
+    if (ptyProcess) {
+      ptyProcess.write(data);
+    }
+  }
+
+  @SubscribeMessage('terminal:resize')
+  handleTerminalResize(@ConnectedSocket() client: Socket, @MessageBody() size: { cols: number; rows: number }) {
+    const ptyProcess = this.ptyProcesses.get(client.id);
+    if (ptyProcess) {
+      ptyProcess.resize(size.cols, size.rows);
+    }
+  }
+
 
   // ── Emit Events (wywoływane z serwisów) ────
 
