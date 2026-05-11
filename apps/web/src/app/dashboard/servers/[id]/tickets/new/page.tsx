@@ -290,6 +290,17 @@ export default function NewTicketPanelPage() {
               <Layout className="w-4 h-4" /> Stylistyka Wiadomości Głównej (Panelu)
             </div>
             
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <label className="text-[10px] font-bold text-foreground-subtle uppercase">Tytuł Panelu</label>
+                <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} className="w-full bg-background-tertiary border border-border rounded-xl px-4 py-2.5 text-sm outline-none focus:border-accent" />
+              </div>
+              <div className="space-y-2">
+                <label className="text-[10px] font-bold text-foreground-subtle uppercase">Opis / Instrukcja</label>
+                <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={3} className="w-full bg-background-tertiary border border-border rounded-xl px-4 py-2.5 text-sm outline-none resize-none focus:border-accent" />
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="space-y-2">
                 <label className="text-[10px] font-bold text-foreground-subtle uppercase">Kanał Docelowy</label>
@@ -320,17 +331,6 @@ export default function NewTicketPanelPage() {
               </motion.div>
             )}
 
-
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <label className="text-[10px] font-bold text-foreground-subtle uppercase">Tytuł Panelu</label>
-                <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} className="w-full bg-background-tertiary border border-border rounded-xl px-4 py-2.5 text-sm outline-none focus:border-accent" />
-              </div>
-              <div className="space-y-2">
-                <label className="text-[10px] font-bold text-foreground-subtle uppercase">Opis / Instrukcja</label>
-                <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={3} className="w-full bg-background-tertiary border border-border rounded-xl px-4 py-2.5 text-sm outline-none resize-none focus:border-accent" />
-              </div>
-            </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                <div className="space-y-2">
