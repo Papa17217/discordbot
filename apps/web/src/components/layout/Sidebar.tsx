@@ -11,8 +11,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   LayoutDashboard, Server, Shield, Coins, Star, Ticket,
   BarChart3, Settings, Crown, MessageSquare, Bot,
-  Users, Zap, ChevronLeft, Sparkles, HandMetal, Layers
+  Users, Zap, ChevronLeft, Sparkles, HandMetal, Layers, Terminal
 } from 'lucide-react';
+
 import { cn } from '@/lib/utils';
 import { useUIStore } from '@/stores/uiStore';
 import { useAuthStore } from '@/stores/authStore';
