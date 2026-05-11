@@ -89,11 +89,22 @@ export default function AdminConsolePage() {
     }
   }, [activeTab, isConnected]);
 
+  const restartTerminal = () => {
+    if (xtermRef.current) {
+      xtermRef.current.dispose();
+      xtermRef.current = null;
+    }
+    setActiveTab('logs');
+    setTimeout(() => setActiveTab('terminal'), 100);
+  };
+
   // Inicjalizacja XTerm
   useEffect(() => {
+    let resizeTimer: any;
+    
     if (activeTab === 'terminal' && terminalRef.current && !xtermRef.current) {
-      console.log('🛠 Initializing XTerm');
-
+      console.log('🛠 Initializing XTerm...');
+      
       const term = new XTerm({
         cursorBlink: true,
         fontSize: 14,
@@ -110,7 +121,15 @@ export default function AdminConsolePage() {
       const fitAddon = new FitAddon();
       term.loadAddon(fitAddon);
       term.open(terminalRef.current);
-      fitAddon.fit();
+      
+      // Mały delay na wyrenderowanie DOM
+      setTimeout(() => {
+        fitAddon.fit();
+        socketRef.current?.emit('terminal:resize', {
+          cols: term.cols,
+          rows: term.rows,
+        });
+      }, 200);
 
       term.onData((data) => {
         socketRef.current?.emit('terminal:input', data);
@@ -119,24 +138,28 @@ export default function AdminConsolePage() {
       xtermRef.current = term;
       fitAddonRef.current = fitAddon;
 
-      socketRef.current?.emit('terminal:join');
-
       const handleResize = () => {
-        fitAddon.fit();
-        socketRef.current?.emit('terminal:resize', {
-          cols: term.cols,
-          rows: term.rows,
-        });
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(() => {
+          if (fitAddonRef.current) {
+            fitAddonRef.current.fit();
+            socketRef.current?.emit('terminal:resize', {
+              cols: term.cols,
+              rows: term.rows,
+            });
+          }
+        }, 200);
       };
 
       window.addEventListener('resize', handleResize);
-      setTimeout(handleResize, 100);
+
+      socketRef.current?.emit('terminal:join');
 
       return () => {
         window.removeEventListener('resize', handleResize);
+        clearTimeout(resizeTimer);
       };
     }
-    return () => {};
   }, [activeTab]);
 
 
@@ -291,9 +314,18 @@ export default function AdminConsolePage() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="h-[65.5vh] bg-[#0c0c0e] p-2"
-              ref={terminalRef}
-            />
+              className="relative h-[65.5vh] bg-[#0c0c0e] p-2"
+            >
+              <div ref={terminalRef} className="h-full" />
+              <button 
+                onClick={restartTerminal}
+                className="absolute bottom-4 right-6 p-2 bg-background-elevated/80 hover:bg-accent text-foreground-secondary hover:text-white rounded-full transition-all border border-border shadow-xl backdrop-blur-md z-10 group"
+                title="Zrestartuj terminal"
+              >
+                <RefreshCcw className="w-4 h-4 group-active:rotate-180 transition-transform duration-500" />
+              </button>
+            </motion.div>
+
           )}
         </AnimatePresence>
 
