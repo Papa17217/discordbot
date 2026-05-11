@@ -135,9 +135,13 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
         name: 'xterm-color',
         cols: 80,
         rows: 24,
-        cwd: process.env.HOME || process.cwd(),
+        cwd: process.cwd(),
         env: process.env as any,
       });
+
+      // Wyślij powitanie
+      client.emit('terminal:output', '\r\n🚀 Terminal systemowy gotowy...\r\n\r\n');
+
 
       ptyProcess.onData((data) => {
         client.emit('terminal:output', data);

@@ -70,6 +70,7 @@ export default function AdminConsolePage() {
     });
 
     socket.on('terminal:output', (data: string) => {
+      console.log('📥 Terminal output received');
       if (xtermRef.current) {
         xtermRef.current.write(data);
       }
@@ -80,9 +81,19 @@ export default function AdminConsolePage() {
     };
   }, []);
 
+  // Re-join terminal on tab change or reconnect
+  useEffect(() => {
+    if (activeTab === 'terminal' && isConnected && socketRef.current) {
+      console.log('🚀 Emitting terminal:join');
+      socketRef.current.emit('terminal:join');
+    }
+  }, [activeTab, isConnected]);
+
   // Inicjalizacja XTerm
   useEffect(() => {
     if (activeTab === 'terminal' && terminalRef.current && !xtermRef.current) {
+      console.log('🛠 Initializing XTerm');
+
       const term = new XTerm({
         cursorBlink: true,
         fontSize: 14,
