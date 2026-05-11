@@ -173,6 +173,23 @@ export default function AdminConsolePage() {
 
   const clearLogs = () => setLogs([]);
 
+  const runQuickCommand = (cmd: string) => {
+    if (activeTab !== 'terminal') setActiveTab('terminal');
+    // Mały delay żeby terminal zdążył się przełączyć
+    setTimeout(() => {
+      socketRef.current?.emit('terminal:input', cmd + '\n');
+    }, 200);
+  };
+
+  const quickActions = [
+    { label: 'Full Update', cmd: 'cd ~/discordbot && git pull && pnpm install && pnpm build && pm2 restart all', icon: RefreshCcw, color: 'text-emerald-400' },
+    { label: 'Status', cmd: 'pm2 status', icon: Layout, color: 'text-blue-400' },
+    { label: 'Restart All', cmd: 'pm2 restart all', icon: RefreshCcw, color: 'text-amber-400' },
+    { label: 'Logi API', cmd: 'pm2 logs api --lines 50', icon: Terminal, color: 'text-purple-400' },
+    { label: 'Logi Bota', cmd: 'pm2 logs bot --lines 50', icon: Terminal, color: 'text-indigo-400' },
+    { label: 'Czyść', cmd: 'clear', icon: Trash2, color: 'text-foreground-subtle' },
+  ];
+
   const filteredLogs = logs.filter(log => {
     if (filter === 'all') return true;
     const level = log.level?.toLowerCase() || '';
@@ -180,6 +197,7 @@ export default function AdminConsolePage() {
   });
 
   if (user?.role !== 'OWNER' && user?.role !== 'ADMIN' && user?.role !== 'SUPER_ADMIN') {
+
     return (
       <div className="flex flex-col items-center justify-center h-[60vh] gap-4">
         <Shield className="w-16 h-16 text-rose-500 opacity-20" />
@@ -234,6 +252,22 @@ export default function AdminConsolePage() {
             <Monitor className="w-4 h-4" /> Terminal SSH
           </button>
         </div>
+      </div>
+
+      {/* Quick Actions Bar */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
+        {quickActions.map((action, i) => (
+          <button
+            key={i}
+            onClick={() => runQuickCommand(action.cmd)}
+            className="flex flex-col items-center justify-center gap-2 p-3 glass-card hover:border-accent/50 transition-all group"
+          >
+            <action.icon className={cn("w-5 h-5", action.color)} />
+            <span className="text-[10px] font-bold uppercase tracking-wider text-foreground-secondary group-hover:text-foreground">
+              {action.label}
+            </span>
+          </button>
+        ))}
       </div>
 
       <div className="glass-card border-accent/20 overflow-hidden flex flex-col shadow-2xl shadow-accent/5">
@@ -316,9 +350,9 @@ export default function AdminConsolePage() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="relative h-[65.5vh] bg-[#0c0c0e] p-2"
+              className="relative h-[65.5vh] bg-[#0c0c0e] p-2 flex"
             >
-              <div ref={terminalRef} className="h-full" />
+              <div ref={terminalRef} className="flex-grow h-full" />
               <button 
                 onClick={restartTerminal}
                 className="absolute bottom-4 right-6 p-2 bg-background-elevated/80 hover:bg-accent text-foreground-secondary hover:text-white rounded-full transition-all border border-border shadow-xl backdrop-blur-md z-10 group"
@@ -327,7 +361,6 @@ export default function AdminConsolePage() {
                 <RefreshCcw className="w-4 h-4 group-active:rotate-180 transition-transform duration-500" />
               </button>
             </motion.div>
-
           )}
         </AnimatePresence>
 
