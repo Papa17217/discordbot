@@ -25,8 +25,9 @@ export async function loadCommands(client: BotClient) {
 
     if (!stat.isDirectory()) continue;
 
+    const isTS = __filename.endsWith('.ts');
     const commandFiles = fs.readdirSync(categoryPath).filter(
-      (file) => file.endsWith('.ts') || file.endsWith('.js'),
+      (file) => (isTS && file.endsWith('.ts')) || (!isTS && file.endsWith('.js')),
     );
 
     for (const file of commandFiles) {

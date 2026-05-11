@@ -16,8 +16,9 @@ export async function loadEvents(client: BotClient) {
     return;
   }
 
+  const isTS = __filename.endsWith('.ts');
   const eventFiles = fs.readdirSync(eventsPath).filter(
-    (file) => file.endsWith('.ts') || file.endsWith('.js'),
+    (file) => (isTS && file.endsWith('.ts')) || (!isTS && file.endsWith('.js')),
   );
 
   for (const file of eventFiles) {
