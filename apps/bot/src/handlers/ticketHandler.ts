@@ -52,8 +52,9 @@ async function processTicketAction(client: BotClient, interaction: ButtonInterac
       }
       if (action === 'SEND_MESSAGE' && !button.actions.includes('OPEN_TICKET')) {
         // Only send standalone message if NOT opening a ticket (to avoid double spam)
-        results.push(button.message);
+        results.push(button.message || '');
       }
+
     }
 
     // Single final reply
