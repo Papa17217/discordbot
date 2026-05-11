@@ -29,6 +29,7 @@ export class AdminController {
     @Body() log: { level: string; message: string; timestamp: string },
     @Headers('x-bot-token') token: string,
   ) {
+    console.log('📥 Otrzymano log z bota:', log.message);
     // Prosta weryfikacja czy to na pewno bot
     if (token !== this.config.get('DISCORD_TOKEN')) {
       throw new UnauthorizedException('Błędny token bota');
