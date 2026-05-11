@@ -160,7 +160,9 @@ export default function AdminConsolePage() {
         clearTimeout(resizeTimer);
       };
     }
+    return () => {};
   }, [activeTab]);
+
 
 
   useEffect(() => {
