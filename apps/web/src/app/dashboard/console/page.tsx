@@ -254,35 +254,38 @@ export default function AdminConsolePage() {
         </div>
       </div>
 
-      {/* Quick Actions Bar */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
-        {quickActions.map((action, i) => (
-          <button
-            key={i}
-            onClick={() => runQuickCommand(action.cmd)}
-            className="flex flex-col items-center justify-center gap-2 p-3 glass-card hover:border-accent/50 transition-all group"
-          >
-            <action.icon className={cn("w-5 h-5", action.color)} />
-            <span className="text-[10px] font-bold uppercase tracking-wider text-foreground-secondary group-hover:text-foreground">
-              {action.label}
-            </span>
-          </button>
-        ))}
-      </div>
-
       <div className="glass-card border-accent/20 overflow-hidden flex flex-col shadow-2xl shadow-accent/5">
         <div className="bg-background-elevated/50 px-4 py-2 border-b border-border flex items-center justify-between">
-          <div className="flex gap-1.5">
-            <div className="w-3 h-3 rounded-full bg-rose-500/50" />
-            <div className="w-3 h-3 rounded-full bg-amber-500/50" />
-            <div className="w-3 h-3 rounded-full bg-emerald-500/50" />
+
+          <div className="flex gap-1.5 items-center">
+            <div className="flex gap-1.5 mr-4">
+              <div className="w-3 h-3 rounded-full bg-rose-500/50" />
+              <div className="w-3 h-3 rounded-full bg-amber-500/50" />
+              <div className="w-3 h-3 rounded-full bg-emerald-500/50" />
+            </div>
+            
+            {/* Nowe Szybkie Przyciski w nagłówku */}
+            <div className="hidden md:flex items-center gap-1 border-l border-border pl-4">
+              {quickActions.map((action, i) => (
+                <button
+                  key={i}
+                  onClick={() => runQuickCommand(action.cmd)}
+                  title={action.label}
+                  className="p-1.5 hover:bg-white/10 rounded-md transition-colors group"
+                >
+                  <action.icon className={cn("w-3.5 h-3.5", action.color)} />
+                </button>
+              ))}
+            </div>
           </div>
+
           <div className="text-[10px] text-foreground-subtle font-mono uppercase tracking-widest flex items-center gap-2">
             <Shield className="w-3 h-3" /> 
             {activeTab === 'logs' ? 'expo-bot@system ~ log-stream' : 'ubuntu@oracle-cloud ~ /bin/bash'}
           </div>
           <div className="w-12" />
         </div>
+
 
         <AnimatePresence mode="wait">
           {activeTab === 'logs' ? (
