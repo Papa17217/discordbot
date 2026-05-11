@@ -52,12 +52,22 @@ export function Sidebar() {
   const links = useMemo(() => {
     let baseLinks = isServerPage ? [...serverLinks] : [...mainLinks];
     
-    // Dodaj Staff i Konsolę tylko dla OWNER/ADMIN w głównym menu
-    if (!isServerPage && user && ['OWNER', 'ADMIN'].includes(user.role)) {
-      baseLinks.splice(2, 0, { href: '/dashboard/admin/staff', label: 'Ekipa', icon: Shield });
-      baseLinks.splice(3, 0, { href: '/dashboard/admin/settings', label: 'Globalne', icon: Settings });
-      baseLinks.splice(4, 0, { href: '/dashboard/console', label: 'Konsola', icon: Terminal });
+    // Dodaj Staff, Globalne i Konsolę dla OWNER/ADMIN/SUPER_ADMIN w obu widokach
+    if (user && ['OWNER', 'ADMIN', 'SUPER_ADMIN'].includes(user.role)) {
+      const adminLinks = [
+        { href: '/dashboard/admin/staff', label: 'Ekipa', icon: Shield, isGlobal: true },
+        { href: '/dashboard/admin/settings', label: 'Globalne', icon: Settings, isGlobal: true },
+        { href: '/dashboard/console', label: 'Konsola', icon: Terminal, isGlobal: true },
+      ];
+
+      // W widoku serwera dodaj na końcu, w widoku głównym w środku
+      if (isServerPage) {
+        baseLinks.push(...adminLinks);
+      } else {
+        baseLinks.splice(2, 0, ...adminLinks);
+      }
     }
+
 
 
     
@@ -108,8 +118,9 @@ export function Sidebar() {
           </div>
         )}
 
-        {links.map((link) => {
-          const fullHref = basePath + link.href || '/dashboard';
+        {links.map((link: any) => {
+          const fullHref = link.isGlobal ? link.href : (basePath + link.href || '/dashboard');
+
           const isActive = pathname === fullHref || (link.href === '' && pathname === basePath);
 
           return (
