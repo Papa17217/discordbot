@@ -67,7 +67,8 @@ async function bootstrap() {
   app.enableShutdownHooks();
 
   const port = process.env.API_PORT || 4000;
-  await app.listen(port);
+  await app.listen(port, '0.0.0.0');
+
 
   console.log(`🚀 API działa na: http://localhost:${port}`);
   console.log(`📚 Swagger: http://localhost:${port}/api/docs`);

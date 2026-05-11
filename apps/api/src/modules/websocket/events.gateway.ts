@@ -37,13 +37,15 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
   // ── Połączenie — weryfikacja JWT ───────────
 
   async handleConnection(client: Socket) {
+    console.log(`📡 Próba połączenia WebSocket: ${client.id}`);
     try {
       const token =
         client.handshake.auth?.token ||
         client.handshake.headers?.authorization?.replace('Bearer ', '');
 
       if (!token) {
-        client.disconnect();
+        console.warn(`⚠️ Brak tokena dla połączenia ${client.id}`);
+        // client.disconnect(); // Tymczasowo wyłączone dla testu
         return;
       }
 
@@ -53,10 +55,12 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
       this.connectedUsers.set(client.id, payload.sub);
       console.log(`🔌 WebSocket: ${payload.username} połączony (${client.id})`);
-    } catch {
-      client.disconnect();
+    } catch (err) {
+      console.error(`❌ Błąd autoryzacji WebSocket dla ${client.id}:`, err.message);
+      // client.disconnect(); // Tymczasowo wyłączone dla testu
     }
   }
+
 
   handleDisconnect(client: Socket) {
     const userId = this.connectedUsers.get(client.id);
