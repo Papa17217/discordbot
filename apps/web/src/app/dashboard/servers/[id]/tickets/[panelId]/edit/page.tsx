@@ -467,15 +467,23 @@ export default function EditTicketPanelPage() {
                                       placeholder="Np. ticket-{username}"
                                       className="w-full bg-background-tertiary border border-border rounded-xl px-4 py-2.5 text-xs outline-none focus:border-blue-400" 
                                     />
-                                    <div className="flex flex-wrap gap-2 pt-1">
-                                      {['{username}', '{nickname}', '{index}', '{subject}'].map(tag => (
+                                    <div className="grid grid-cols-2 gap-2 pt-1">
+                                      {[
+                                        { tag: '{username}', label: 'Użytkownik', desc: 'np. papa', color: 'blue' },
+                                        { tag: '{nickname}', label: 'Pseudonim', desc: 'z serwera', color: 'purple' },
+                                        { tag: '{index}', label: 'Numer', desc: 'np. 001', color: 'emerald' },
+                                        { tag: '{subject}', label: 'Temat', desc: 'z przycisku', color: 'amber' },
+                                      ].map(item => (
                                         <button 
-                                          key={tag}
+                                          key={item.tag}
                                           type="button"
-                                          onClick={() => updateButton(currentBtn.id, { namingFormat: (currentBtn.namingFormat || '') + tag })}
-                                          className="text-[9px] bg-blue-500/10 text-blue-400 px-1.5 py-0.5 rounded border border-blue-500/20 hover:bg-blue-500/20 transition-all"
+                                          onClick={() => updateButton(currentBtn.id, { namingFormat: (currentBtn.namingFormat || '') + item.tag })}
+                                          className={`flex flex-col items-start p-2 rounded-xl border border-${item.color}-500/10 bg-${item.color}-500/5 hover:bg-${item.color}-500/10 hover:border-${item.color}-500/30 transition-all group text-left`}
                                         >
-                                          {tag}
+                                          <div className={`text-[10px] font-bold text-${item.color}-400 flex items-center gap-1.5`}>
+                                            <Plus className="w-2.5 h-2.5 group-hover:scale-125 transition-transform" /> {item.label}
+                                          </div>
+                                          <div className="text-[8px] text-foreground-subtle">{item.desc} ({item.tag})</div>
                                         </button>
                                       ))}
                                     </div>
