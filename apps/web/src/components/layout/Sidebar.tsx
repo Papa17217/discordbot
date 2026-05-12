@@ -16,6 +16,7 @@ import {
 
 import { cn } from '@/lib/utils';
 import { useUIStore } from '@/stores/uiStore';
+import { useAuthStore } from '@/stores/authStore';
 import { getDiscordAvatarUrl } from '@/lib/utils';
 import { useTranslation } from '@/providers/LanguageProvider';
 
@@ -63,20 +64,19 @@ export function Sidebar() {
 
   const isServerPage = !!params?.id;
   
+  const links = useMemo(() => {
+    let baseLinks = isServerPage ? [...serverLinks] : [...mainLinks];
+
     if (user && ['OWNER', 'ADMIN', 'SUPER_ADMIN'].includes(user.role)) {
-      // W widoku serwera dodaj na końcu, w widoku głównym w środku
       if (isServerPage) {
         baseLinks.push(...adminLinks);
       } else {
         baseLinks.splice(2, 0, ...adminLinks);
       }
     }
-
-
-
     
     return baseLinks;
-  }, [isServerPage, user]);
+  }, [isServerPage, user, mainLinks, serverLinks, adminLinks]);
 
   const basePath = isServerPage ? `/dashboard/servers/${params.id}` : '';
 
