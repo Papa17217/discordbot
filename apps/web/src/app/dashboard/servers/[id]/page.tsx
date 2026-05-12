@@ -10,6 +10,8 @@ import { api } from '@/lib/api';
 import { toast } from 'sonner';
 import { useTranslation } from '@/providers/LanguageProvider';
 
+const anim = { hidden: { opacity: 0, y: 15 }, show: { opacity: 1, y: 0 } };
+
 export default function ServerOverviewPage() {
   const params = useParams();
   const serverId = params?.id as string;
