@@ -6,6 +6,7 @@ import { useEffect, useState, useMemo } from 'react';
 import { useParams } from 'next/navigation';
 import { api } from '@/lib/api';
 import { toast } from 'sonner';
+import { useTranslation } from '@/providers/LanguageProvider';
 
 const formatTimeAgo = (dateStr: string) => {
   const date = new Date(dateStr);
@@ -44,6 +45,7 @@ export default function ModerationPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [editingAction, setEditingAction] = useState<ModActionType | null>(null);
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (!serverId) return;
@@ -77,9 +79,9 @@ export default function ModerationPage() {
     setIsSaving(true);
     try {
       await api.patch(`/guilds/${serverId}/config/moderation`, config);
-      toast.success('Ustawienia zapisane pomyślnie!');
+      toast.success(t.common.success);
     } catch (err) {
-      toast.error('Błąd podczas zapisywania ustawień');
+      toast.error(t.common.error);
     } finally {
       setIsSaving(false);
     }
@@ -95,7 +97,7 @@ export default function ModerationPage() {
     return config ? config[key] : '';
   };
 
-  if (isLoading) return <div className="flex flex-col items-center justify-center h-[60vh] gap-4"><Loader2 className="w-8 h-8 animate-spin text-rose-400" /><p className="text-foreground-secondary">Ładowanie...</p></div>;
+  if (isLoading) return <div className="flex flex-col items-center justify-center h-[60vh] gap-4"><Loader2 className="w-8 h-8 animate-spin text-rose-400" /><p className="text-foreground-secondary">{t.common.loading}</p></div>;
   if (error) return <div className="flex flex-col items-center justify-center h-[60vh] gap-4 text-center"><AlertCircle className="w-12 h-12 text-rose-500" /><p className="text-rose-500 font-medium">{error}</p></div>;
 
   return (
@@ -107,7 +109,7 @@ export default function ModerationPage() {
         </div>
         {activeTab === 'settings' && (
           <button onClick={handleSave} disabled={isSaving} className="btn-primary bg-rose-500 hover:bg-rose-600 text-white border-transparent flex items-center gap-2">
-            {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} Zapisz Zmiany
+            {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} {t.common.saveChanges}
           </button>
         )}
       </div>

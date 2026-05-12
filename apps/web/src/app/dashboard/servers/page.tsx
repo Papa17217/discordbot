@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { Server, Plus, Users, Crown } from 'lucide-react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
+import { useTranslation } from '@/providers/LanguageProvider';
 
 import { useEffect } from 'react';
 import { useGuildStore } from '@/stores/guildStore';
@@ -13,6 +14,7 @@ const anim = { hidden: { opacity: 0, y: 15 }, show: { opacity: 1, y: 0 } };
 
 export default function ServersPage() {
   const { guilds, isLoading, error, fetchGuilds } = useGuildStore();
+  const { t } = useTranslation();
 
   useEffect(() => {
     fetchGuilds();
@@ -32,7 +34,7 @@ export default function ServersPage() {
     return (
       <div className="flex flex-col items-center justify-center h-[60vh] gap-4">
         <Loader2 className="w-8 h-8 animate-spin text-accent" />
-        <p className="text-foreground-secondary">Wczytywanie Twoich serwerów...</p>
+        <p className="text-foreground-secondary">{t.common.loading}</p>
       </div>
     );
   }
@@ -57,8 +59,8 @@ export default function ServersPage() {
   return (
     <motion.div initial="hidden" animate="show" transition={{ staggerChildren: 0.08 }} className="space-y-8">
       <motion.div variants={anim}>
-        <h1 className="text-3xl font-bold">Serwery</h1>
-        <p className="text-foreground-secondary mt-1">Wybierz serwer do zarządzania.</p>
+        <h1 className="text-3xl font-bold">{t.sidebar.servers}</h1>
+        <p className="text-foreground-secondary mt-1">{t.dashboard.selectServer}</p>
       </motion.div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">

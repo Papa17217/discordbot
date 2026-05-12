@@ -7,12 +7,14 @@ import { formatNumber, formatUptime } from '@discord-saas/shared';
 import { useEffect, useState } from 'react';
 import { api } from '@/lib/api';
 import { toast } from 'sonner';
+import { useTranslation } from '@/providers/LanguageProvider';
 
 const anim = { hidden: { opacity: 0, y: 15 }, show: { opacity: 1, y: 0 } };
 
 export default function DashboardPage() {
   const [data, setData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const { t } = useTranslation();
 
   useEffect(() => {
     fetchStats();
@@ -25,7 +27,7 @@ export default function DashboardPage() {
       const res = await api.get('/admin/stats');
       setData(res.data);
     } catch (err) {
-      toast.error('Błąd pobierania statystyk');
+      toast.error(t.common.error);
     } finally {
       setIsLoading(false);
     }
@@ -36,10 +38,10 @@ export default function DashboardPage() {
   }
 
   const stats = [
-    { label: 'Użytkownicy', value: data?.users || 0, icon: Users, color: 'text-emerald-400', bg: 'bg-emerald-400/10' },
-    { label: 'Serwery', value: data?.guilds || 0, icon: Server, color: 'text-accent', bg: 'bg-accent/10' },
-    { label: 'Tickety', value: data?.tickets || 0, icon: MessageSquare, color: 'text-amber-400', bg: 'bg-amber-400/10' },
-    { label: 'Zgłoszenia', value: 0, icon: Shield, color: 'text-rose-400', bg: 'bg-rose-400/10' },
+    { label: t.sidebar.roles, value: data?.users || 0, icon: Users, color: 'text-emerald-400', bg: 'bg-emerald-400/10' },
+    { label: t.sidebar.servers, value: data?.guilds || 0, icon: Server, color: 'text-accent', bg: 'bg-accent/10' },
+    { label: t.sidebar.tickets, value: data?.tickets || 0, icon: MessageSquare, color: 'text-amber-400', bg: 'bg-amber-400/10' },
+    { label: t.sidebar.moderation, value: 0, icon: Shield, color: 'text-rose-400', bg: 'bg-rose-400/10' },
   ];
 
   const bot = data?.bot || { online: false };
@@ -49,7 +51,7 @@ export default function DashboardPage() {
       <motion.div variants={anim} className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Dashboard</h1>
-          <p className="text-foreground-secondary mt-1">Przegląd aktywności Twojego systemu.</p>
+          <p className="text-foreground-secondary mt-1">{t.dashboard.recentActivity}</p>
         </div>
         <button onClick={fetchStats} className="p-2 hover:bg-background-elevated rounded-xl border border-border transition-colors">
           <Activity className="w-5 h-5 text-foreground-subtle" />
@@ -80,7 +82,7 @@ export default function DashboardPage() {
                  </div>
                  <div className="flex items-center gap-1.5 text-xs text-foreground-secondary">
                    <Cpu className="w-3.5 h-3.5" />
-                   Pamięć: <span className="text-foreground font-medium">{bot.online ? `${(bot.memoryUsage / 1024 / 1024).toFixed(1)} MB` : '0 MB'}</span>
+                   {t.sidebar.settings}: <span className="text-foreground font-medium">{bot.online ? `${(bot.memoryUsage / 1024 / 1024).toFixed(1)} MB` : '0 MB'}</span>
                  </div>
               </div>
             </div>
@@ -172,7 +174,7 @@ export default function DashboardPage() {
             {!data?.recentActions?.length && (
               <div className="text-center py-12 opacity-30">
                 <Activity className="w-10 h-10 mx-auto mb-2" />
-                <p className="text-xs">Brak ostatnich akcji</p>
+                <p className="text-xs">{t.dashboard.recentActivity}</p>
               </div>
             )}
           </div>

@@ -8,22 +8,7 @@ import { useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { api } from '@/lib/api';
 import { toast } from 'sonner';
-
-const MODULES_MAP = [
-  { id: 'moderation', key: 'moderationEnabled', name: 'Moderacja', desc: 'Bany, kicki, ostrzeżenia, logi', icon: Shield, color: 'text-rose-400', bg: 'bg-rose-400/10' },
-  { id: 'automod', key: 'automodEnabled', name: 'AutoMod', desc: 'Automatyczne filtry i ochrona', icon: Zap, color: 'text-amber-400', bg: 'bg-amber-400/10' },
-  { id: 'economy', key: 'economyEnabled', name: 'Ekonomia', desc: 'Waluta, sklep, daily, ranking', icon: Coins, color: 'text-emerald-400', bg: 'bg-emerald-400/10' },
-  { id: 'levels', key: 'levelsEnabled', name: 'Poziomy XP', desc: 'Doświadczenie, rangi, nagrody', icon: Star, color: 'text-purple-400', bg: 'bg-purple-400/10' },
-  { id: 'tickets', key: 'ticketsEnabled', name: 'Tickety', desc: 'System wsparcia i pomocy', icon: Ticket, color: 'text-blue-400', bg: 'bg-blue-400/10' },
-  { id: 'welcome', key: 'welcomeEnabled', name: 'Powitania', desc: 'Wiadomości powitalne i pożegnalne', icon: HandMetal, color: 'text-pink-400', bg: 'bg-pink-400/10' },
-  { id: 'reaction-roles', key: 'reactionRolesEnabled', name: 'Reaction Roles', desc: 'Nadawanie ról przez reakcje', icon: Layers, color: 'text-cyan-400', bg: 'bg-cyan-400/10' },
-  { id: 'analytics', key: null, name: 'Analityka', desc: 'Wykresy, statystyki, raporty', icon: BarChart3, color: 'text-accent', bg: 'bg-accent/10' },
-  { id: 'logs', key: 'loggingEnabled', name: 'Logi', desc: 'Historia akcji i zdarzeń', icon: MessageSquare, color: 'text-foreground-secondary', bg: 'bg-glass' },
-];
-
-
-
-const anim = { hidden: { opacity: 0, y: 15 }, show: { opacity: 1, y: 0 } };
+import { useTranslation } from '@/providers/LanguageProvider';
 
 export default function ServerOverviewPage() {
   const params = useParams();
@@ -31,6 +16,19 @@ export default function ServerOverviewPage() {
   const [config, setConfig] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { t } = useTranslation();
+
+  const MODULES_MAP = [
+    { id: 'moderation', key: 'moderationEnabled', name: t.sidebar.moderation, desc: t.moderation.description, icon: Shield, color: 'text-rose-400', bg: 'bg-rose-400/10' },
+    { id: 'automod', key: 'automodEnabled', name: t.sidebar.automod, desc: t.automod.description, icon: Zap, color: 'text-amber-400', bg: 'bg-amber-400/10' },
+    { id: 'economy', key: 'economyEnabled', name: t.sidebar.economy, desc: 'Waluta, sklep, daily, ranking', icon: Coins, color: 'text-emerald-400', bg: 'bg-emerald-400/10' },
+    { id: 'levels', key: 'levelsEnabled', name: t.sidebar.levels, desc: 'Doświadczenie, rangi, nagrody', icon: Star, color: 'text-purple-400', bg: 'bg-purple-400/10' },
+    { id: 'tickets', key: 'ticketsEnabled', name: t.sidebar.tickets, desc: t.tickets.description, icon: Ticket, color: 'text-blue-400', bg: 'bg-blue-400/10' },
+    { id: 'welcome', key: 'welcomeEnabled', name: t.sidebar.welcome, desc: 'Wiadomości powitalne i pożegnalne', icon: HandMetal, color: 'text-pink-400', bg: 'bg-pink-400/10' },
+    { id: 'reaction-roles', key: 'reactionRolesEnabled', name: t.sidebar.reactionRoles, desc: 'Nadawanie ról przez reakcje', icon: Layers, color: 'text-cyan-400', bg: 'bg-cyan-400/10' },
+    { id: 'analytics', key: null, name: t.sidebar.analytics, desc: 'Wykresy, statystyki, raporty', icon: BarChart3, color: 'text-accent', bg: 'bg-accent/10' },
+    { id: 'logs', key: 'loggingEnabled', name: t.sidebar.logs, desc: 'Historia akcji i zdarzeń', icon: MessageSquare, color: 'text-foreground-secondary', bg: 'bg-glass' },
+  ];
 
   useEffect(() => {
     if (!serverId) return;
@@ -64,7 +62,7 @@ export default function ServerOverviewPage() {
     return (
       <div className="flex flex-col items-center justify-center h-[60vh] gap-4">
         <Loader2 className="w-8 h-8 animate-spin text-accent" />
-        <p className="text-foreground-secondary">Ładowanie przeglądu serwera...</p>
+        <p className="text-foreground-secondary">{t.common.loading}</p>
       </div>
     );
   }
@@ -82,8 +80,8 @@ export default function ServerOverviewPage() {
     <motion.div initial="hidden" animate="show" transition={{ staggerChildren: 0.05 }} className="space-y-8">
       <motion.div variants={anim} className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Przegląd serwera</h1>
-          <p className="text-foreground-secondary mt-1">Zarządzaj modułami i ustawieniami.</p>
+          <h1 className="text-3xl font-bold">{t.sidebar.overview}</h1>
+          <p className="text-foreground-secondary mt-1">{t.dashboard.selectServer}</p>
         </div>
         <div className="flex items-center gap-2 text-sm text-status-success">
           <span className="status-dot-online" /> Bot aktywny

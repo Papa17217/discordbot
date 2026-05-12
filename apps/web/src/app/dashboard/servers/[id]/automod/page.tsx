@@ -4,6 +4,7 @@ import { Zap, Plus, Trash2, Shield, AlertTriangle, MessageSquare, Link as LinkIc
 import { useEffect, useState, useMemo, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { api } from '@/lib/api';
+import { useTranslation } from '@/providers/LanguageProvider';
 import Link from 'next/link';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
@@ -86,6 +87,7 @@ export default function AutoModPage() {
   const [channels, setChannels] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [editingRule, setEditingRule] = useState<Partial<AutoModRule> | null>(null);
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (serverId) loadData();
@@ -154,9 +156,9 @@ export default function AutoModPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold flex items-center gap-3">
-             <ShieldCheck className="w-8 h-8 text-amber-400" /> System AutoMod Premium
+             <ShieldCheck className="w-8 h-8 text-amber-400" /> {t.automod.title} Premium
           </h1>
-          <p className="text-foreground-secondary mt-1">Inteligentna ochrona serwera działająca 24/7.</p>
+          <p className="text-foreground-secondary mt-1">{t.automod.description}</p>
         </div>
         <button 
           onClick={() => setEditingRule({ type: 'WORD_FILTER', enabled: true, action: 'DELETE', threshold: 5, words: [], exemptRoles: [], exemptChannels: [] })}

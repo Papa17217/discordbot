@@ -7,6 +7,7 @@ import { api } from '@/lib/api';
 import Link from 'next/link';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { useTranslation } from '@/providers/LanguageProvider';
 
 export default function TicketsPage() {
   const params = useParams();
@@ -16,6 +17,7 @@ export default function TicketsPage() {
   const [archivedTickets, setArchivedTickets] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedTranscript, setSelectedTranscript] = useState<any>(null);
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (!serverId) return;
@@ -33,7 +35,7 @@ export default function TicketsPage() {
       setPanels(res.data.data);
     } catch (err) {
       console.error(err);
-      toast.error('Nie udało się pobrać paneli');
+      toast.error(t.common.error);
     } finally {
       setIsLoading(false);
     }
@@ -77,9 +79,9 @@ export default function TicketsPage() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold flex items-center gap-3">
-            <Ticket className="w-7 h-7 text-blue-400" /> System Ticketów
+            <Ticket className="w-7 h-7 text-blue-400" /> {t.tickets.title}
           </h1>
-          <p className="text-foreground-secondary mt-1">Zarządzaj panelami i przeglądaj historię rozmów.</p>
+          <p className="text-foreground-secondary mt-1">{t.tickets.description}</p>
         </div>
         <div className="flex gap-2 bg-background-secondary p-1 rounded-xl border border-border self-start">
           <button 
@@ -89,7 +91,7 @@ export default function TicketsPage() {
               activeTab === 'panels' ? "bg-blue-500 text-white shadow-lg" : "text-foreground-secondary hover:text-foreground hover:bg-white/5"
             )}
           >
-            <Layers className="w-4 h-4" /> Panele
+            <Layers className="w-4 h-4" /> {t.tickets.panels}
           </button>
           <button 
             onClick={() => setActiveTab('archive')}
@@ -98,7 +100,7 @@ export default function TicketsPage() {
               activeTab === 'archive' ? "bg-blue-500 text-white shadow-lg" : "text-foreground-secondary hover:text-foreground hover:bg-white/5"
             )}
           >
-            <Archive className="w-4 h-4" /> Archiwum
+            <Archive className="w-4 h-4" /> {t.sidebar.logs}
           </button>
         </div>
       </div>
@@ -114,7 +116,7 @@ export default function TicketsPage() {
           >
             <div className="flex justify-end">
               <Link href={`/dashboard/servers/${serverId}/tickets/new`} className="btn-primary flex items-center gap-2">
-                <Plus className="w-4 h-4" /> Nowy Panel
+                <Plus className="w-4 h-4" /> {t.tickets.createPanel}
               </Link>
             </div>
             
@@ -124,7 +126,7 @@ export default function TicketsPage() {
               ) : panels.length === 0 ? (
                 <div className="col-span-full glass-card p-12 text-center text-foreground-secondary flex flex-col items-center gap-4">
                   <Ticket className="w-12 h-12 opacity-20" />
-                  <p>Brak utworzonych paneli. Kliknij przycisk powyżej, aby stworzyć swój pierwszy panel.</p>
+                  <p>{t.tickets.noPanels}</p>
                 </div>
               ) : (
                 panels.map((panel) => (
@@ -148,7 +150,7 @@ export default function TicketsPage() {
                     <th className="px-6 py-4">Temat</th>
                     <th className="px-6 py-4">Data otwarcia</th>
                     <th className="px-6 py-4">Data zamknięcia</th>
-                    <th className="px-6 py-4 text-right">Akcja</th>
+                    <th className="px-6 py-4 text-right">{t.common.actions}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border/50">
