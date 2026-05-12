@@ -427,6 +427,7 @@ model TicketButton {
   staffMessage       String?  @default("Administracja potrzebna natychmiast!")
   
   categoryId  String?
+  namingFormat String @default("ticket-{username}")
 
   @@map("ticket_buttons")
 }

@@ -29,6 +29,7 @@ interface ButtonConfig {
   staffButtonLabel: string;
   staffMessage: string;
   categoryId: string;
+  namingFormat: string;
   customId?: string; // Zachowanie customId przy edycji
 }
 
@@ -225,7 +226,8 @@ export default function EditTicketPanelPage() {
       closeButtonLabel: 'Zamknij Ticket',
       staffButtonLabel: 'Wezwij Administrację',
       staffMessage: 'Administracja potrzebna natychmiast!',
-      categoryId: ''
+      categoryId: '',
+      namingFormat: 'ticket-{username}'
     }]);
   };
 
@@ -453,6 +455,32 @@ export default function EditTicketPanelPage() {
                                     </select>
                                   </div>
                                   <RoleSelector label="Personel (Dostęp do kanału)" icon={ShieldAlert} allRoles={roles} selectedIds={currentBtn.staffRoleIds} onChange={(ids: any) => updateButton(currentBtn.id, { staffRoleIds: ids })} />
+                                  
+                                  <div className="space-y-2">
+                                    <label className="text-[10px] font-bold text-foreground-subtle uppercase flex items-center gap-2">
+                                      <Hash className="w-3.5 h-3.5" /> Format nazwy kanału
+                                    </label>
+                                    <input 
+                                      type="text" 
+                                      value={currentBtn.namingFormat || 'ticket-{username}'} 
+                                      onChange={(e) => updateButton(currentBtn.id, { namingFormat: e.target.value })} 
+                                      placeholder="Np. ticket-{username}"
+                                      className="w-full bg-background-tertiary border border-border rounded-xl px-4 py-2.5 text-xs outline-none focus:border-blue-400" 
+                                    />
+                                    <div className="flex flex-wrap gap-2 pt-1">
+                                      {['{username}', '{nickname}', '{index}', '{subject}'].map(tag => (
+                                        <button 
+                                          key={tag}
+                                          type="button"
+                                          onClick={() => updateButton(currentBtn.id, { namingFormat: (currentBtn.namingFormat || '') + tag })}
+                                          className="text-[9px] bg-blue-500/10 text-blue-400 px-1.5 py-0.5 rounded border border-blue-500/20 hover:bg-blue-500/20 transition-all"
+                                        >
+                                          {tag}
+                                        </button>
+                                      ))}
+                                    </div>
+                                  </div>
+
                                   <RoleSelector label="Role do powiadomienia (Ping)" icon={BellRing} allRoles={roles} selectedIds={currentBtn.pingRoleIds} onChange={(ids: any) => updateButton(currentBtn.id, { pingRoleIds: ids })} />
                                   
                                   {currentBtn.showStaffButton && (

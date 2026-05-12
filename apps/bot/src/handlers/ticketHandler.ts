@@ -179,8 +179,19 @@ async function handleOpenTicket(client: BotClient, interaction: ButtonInteractio
     }
   }
 
+  const ticketIndex = (await client.prisma.ticket.count({ where: { guildId: button.panel.guildId } })) + 1;
+  const namingFormat = button.namingFormat || 'ticket-{username}';
+  
+  let channelName = namingFormat
+    .replace('{username}', interaction.user.username)
+    .replace('{nickname}', (interaction.member as any)?.displayName || interaction.user.username)
+    .replace('{index}', ticketIndex.toString())
+    .replace('{subject}', button.label)
+    .toLowerCase()
+    .replace(/\s+/g, '-');
+
   const channel = await guild.channels.create({
-    name: `ticket-${interaction.user.username.slice(0, 25)}`,
+    name: channelName.slice(0, 100),
     type: ChannelType.GuildText,
     parent: button.categoryId || ticketConfig?.categoryId || null,
     permissionOverwrites,
