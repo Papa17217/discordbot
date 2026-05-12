@@ -6,6 +6,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { api } from '@/lib/api';
 import Link from 'next/link';
 import { toast } from 'sonner';
+import { useTranslation } from '@/providers/LanguageProvider';
 
 type TicketAction = 'OPEN_TICKET' | 'ADD_ROLE' | 'SEND_MESSAGE';
 
@@ -137,6 +138,7 @@ export default function EditTicketPanelPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [previewMode, setPreviewMode] = useState<'PANEL' | 'TICKET'>('PANEL');
   const [activeButtonIndex, setActiveButtonIndex] = useState(0);
+  const { t } = useTranslation();
 
   // Form State (Panel)
   const [channelId, setChannelId] = useState('');
@@ -277,13 +279,13 @@ export default function EditTicketPanelPage() {
             <ArrowLeft className="w-5 h-5" />
           </Link>
           <div>
-            <h1 className="text-2xl font-bold">Edycja Panelu</h1>
+            <h1 className="text-2xl font-bold">{t.tickets.editPanel}</h1>
             <p className="text-foreground-secondary text-sm">Modyfikujesz istniejący system ticketów. Zmiany zostaną od razu naniesione na Discordzie.</p>
           </div>
         </div>
         <button onClick={handleSubmit} disabled={isSubmitting} className="btn-primary flex items-center gap-2 px-8">
           {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-          Zapisz Zmiany
+          {t.common.save}
         </button>
       </div>
 
@@ -294,7 +296,7 @@ export default function EditTicketPanelPage() {
           {/* Main Panel Styling */}
           <div className="glass-card p-6 space-y-6">
             <div className="flex items-center gap-2 text-blue-400 font-bold text-xs uppercase tracking-wider">
-              <Layout className="w-4 h-4" /> Stylistyka Wiadomości Głównej (Panelu)
+              <Layout className="w-4 h-4" /> {t.tickets.mainStyling}
             </div>
             
             <div className="space-y-4">
