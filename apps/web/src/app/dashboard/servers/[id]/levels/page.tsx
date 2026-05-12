@@ -4,12 +4,14 @@ import { Star, Loader2, AlertCircle } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { api } from '@/lib/api';
+import { useTranslation } from '@/providers/LanguageProvider';
 
 export default function LevelsPage() {
   const params = useParams();
   const serverId = params?.id as string;
   const [config, setConfig] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (!serverId) return;
@@ -30,12 +32,12 @@ export default function LevelsPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold flex items-center gap-3">
-            <Star className="w-7 h-7 text-purple-400" /> Poziomy XP
+            <Star className="w-7 h-7 text-purple-400" /> {t.levels.title}
           </h1>
-          <p className="text-foreground-secondary mt-1">Zarządzaj nagrodami i rangami za aktywność.</p>
+          <p className="text-foreground-secondary mt-1">{t.levels.description}</p>
         </div>
         <button className="btn-primary bg-purple-500 hover:bg-purple-600 text-white border-transparent">
-          Zapisz Zmiany
+          {t.common.saveChanges}
         </button>
       </div>
 

@@ -4,12 +4,14 @@ import { HandMetal, Loader2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { api } from '@/lib/api';
+import { useTranslation } from '@/providers/LanguageProvider';
 
 export default function WelcomePage() {
   const params = useParams();
   const serverId = params?.id as string;
   const [config, setConfig] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (!serverId) return;
@@ -30,12 +32,12 @@ export default function WelcomePage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold flex items-center gap-3">
-            <HandMetal className="w-7 h-7 text-pink-400" /> Powitania
+            <HandMetal className="w-7 h-7 text-pink-400" /> {t.welcome.title}
           </h1>
-          <p className="text-foreground-secondary mt-1">Ustaw powitania i pożegnania graczy.</p>
+          <p className="text-foreground-secondary mt-1">{t.welcome.description}</p>
         </div>
         <button className="btn-primary bg-pink-500 hover:bg-pink-600 text-white border-transparent">
-          Zapisz Zmiany
+          {t.common.saveChanges}
         </button>
       </div>
       <div className="glass-card p-6"><div className="p-8 text-center text-foreground-secondary">Moduł w trakcie tworzenia.</div></div>

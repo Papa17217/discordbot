@@ -2,6 +2,7 @@
 import { motion } from 'framer-motion';
 import { BarChart3 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useTranslation } from '@/providers/LanguageProvider';
 
 const topCommands = [
   { name: '/balance', count: 234, pct: 100 },
@@ -24,11 +25,12 @@ const memberGrowth = [
 ];
 
 export default function AnalyticsPage() {
+  const { t } = useTranslation();
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold flex items-center gap-3"><BarChart3 className="w-7 h-7 text-accent" /> Analityka</h1>
-        <p className="text-foreground-secondary mt-1">Statystyki i wykresy serwera.</p>
+        <h1 className="text-2xl font-bold flex items-center gap-3"><BarChart3 className="w-7 h-7 text-accent" /> {t.sidebar.analytics}</h1>
+        <p className="text-foreground-secondary mt-1">{t.sidebar.analytics} serwera.</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

@@ -280,7 +280,7 @@ export default function EditTicketPanelPage() {
           </Link>
           <div>
             <h1 className="text-2xl font-bold">{t.tickets.editPanel}</h1>
-            <p className="text-foreground-secondary text-sm">Modyfikujesz istniejący system ticketów. Zmiany zostaną od razu naniesione na Discordzie.</p>
+            <p className="text-foreground-secondary text-sm">{t.tickets.creatorDesc}</p>
           </div>
         </div>
         <button onClick={handleSubmit} disabled={isSubmitting} className="btn-primary flex items-center gap-2 px-8">
@@ -301,11 +301,11 @@ export default function EditTicketPanelPage() {
             
             <div className="space-y-4">
               <div className="space-y-2">
-                <label className="text-[10px] font-bold text-foreground-subtle uppercase">Tytuł Panelu</label>
+                <label className="text-[10px] font-bold text-foreground-subtle uppercase">{t.common.title}</label>
                 <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} className="w-full bg-background-tertiary border border-border rounded-xl px-4 py-2.5 text-sm outline-none focus:border-accent" />
               </div>
               <div className="space-y-2">
-                <label className="text-[10px] font-bold text-foreground-subtle uppercase">Opis / Instrukcja</label>
+                <label className="text-[10px] font-bold text-foreground-subtle uppercase">{t.common.description}</label>
                 <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={3} className="w-full bg-background-tertiary border border-border rounded-xl px-4 py-2.5 text-sm outline-none resize-none focus:border-accent" />
               </div>
             </div>
@@ -325,17 +325,17 @@ export default function EditTicketPanelPage() {
                 </div>
               </div>
               <div className="space-y-2">
-                <label className="text-[10px] font-bold text-foreground-subtle uppercase">Styl Komponentów</label>
+                <label className="text-[10px] font-bold text-foreground-subtle uppercase">{t.tickets.componentStyle}</label>
                 <div className="flex bg-background-tertiary p-1 rounded-xl border border-border">
-                   <button onClick={() => setStyle('BUTTON')} className={`flex-1 py-1.5 rounded-lg text-[10px] font-bold transition-all ${style === 'BUTTON' ? 'bg-accent text-white shadow-lg' : 'text-foreground-secondary hover:text-foreground'}`}>PRZYCISKI</button>
-                   <button onClick={() => setStyle('SELECT')} className={`flex-1 py-1.5 rounded-lg text-[10px] font-bold transition-all ${style === 'SELECT' ? 'bg-accent text-white shadow-lg' : 'text-foreground-secondary hover:text-foreground'}`}>LISTA</button>
+                   <button onClick={() => setStyle('BUTTON')} className={`flex-1 py-1.5 rounded-lg text-[10px] font-bold transition-all ${style === 'BUTTON' ? 'bg-accent text-white shadow-lg' : 'text-foreground-secondary hover:text-foreground'}`}>{t.tickets.blue}</button>
+                   <button onClick={() => setStyle('SELECT')} className={`flex-1 py-1.5 rounded-lg text-[10px] font-bold transition-all ${style === 'SELECT' ? 'bg-accent text-white shadow-lg' : 'text-foreground-secondary hover:text-foreground'}`}>{t.tickets.gray}</button>
                 </div>
               </div>
             </div>
 
             {style === 'SELECT' && (
               <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="space-y-2">
-                <label className="text-[10px] font-bold text-emerald-400 uppercase">Tekst na liście (Placeholder)</label>
+                <label className="text-[10px] font-bold text-emerald-400 uppercase">{t.tickets.placeholder}</label>
                 <input type="text" value={placeholder} onChange={(e) => setPlaceholder(e.target.value)} placeholder="Np. Wybierz powód zgłoszenia..." className="w-full bg-background-tertiary border border-emerald-500/20 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-emerald-500" />
               </motion.div>
             )}
@@ -343,15 +343,15 @@ export default function EditTicketPanelPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                <div className="space-y-2">
-                 <label className="text-[10px] font-bold text-foreground-subtle uppercase">Stopka</label>
+                 <label className="text-[10px] font-bold text-foreground-subtle uppercase">{t.tickets.footer}</label>
                  <input type="text" value={footer} onChange={(e) => setFooter(e.target.value)} className="w-full bg-background-tertiary border border-border rounded-xl px-4 py-2.5 text-sm outline-none" />
                </div>
                <div className="space-y-2">
-                 <label className="text-[10px] font-bold text-foreground-subtle uppercase">Miniaturka (URL)</label>
+                 <label className="text-[10px] font-bold text-foreground-subtle uppercase">{t.tickets.thumbnail}</label>
                  <input type="text" value={thumbnail} onChange={(e) => setThumbnail(e.target.value)} className="w-full bg-background-tertiary border border-border rounded-xl px-4 py-2.5 text-sm outline-none font-mono" />
                </div>
                <div className="space-y-2">
-                 <label className="text-[10px] font-bold text-foreground-subtle uppercase">Obraz (URL)</label>
+                 <label className="text-[10px] font-bold text-foreground-subtle uppercase">{t.tickets.image}</label>
                  <input type="text" value={image} onChange={(e) => setImage(e.target.value)} className="w-full bg-background-tertiary border border-border rounded-xl px-4 py-2.5 text-sm outline-none font-mono" />
                </div>
             </div>
@@ -361,9 +361,9 @@ export default function EditTicketPanelPage() {
           <div className="space-y-4">
             <div className="flex items-center justify-between px-2">
               <div className="flex items-center gap-2 text-purple-400 font-bold text-xs uppercase tracking-wider">
-                <MousePointer2 className="w-4 h-4" /> Przyciski i Logika
+                <MousePointer2 className="w-4 h-4" /> {t.tickets.buttonsAndLogic}
               </div>
-              <button onClick={addButton} className="text-[10px] font-bold px-4 py-2 bg-purple-500/10 text-purple-400 border border-purple-500/20 rounded-xl hover:bg-purple-500/20 transition-all">+ DODAJ PRZYCISK</button>
+              <button onClick={addButton} className="text-[10px] font-bold px-4 py-2 bg-purple-500/10 text-purple-400 border border-purple-500/20 rounded-xl hover:bg-purple-500/20 transition-all">+ {t.tickets.addButton}</button>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
@@ -391,7 +391,7 @@ export default function EditTicketPanelPage() {
                   <div className="flex items-center justify-between mb-8">
                     <div className="flex items-center gap-4">
                       <div className="w-10 h-10 bg-accent/10 rounded-xl flex items-center justify-center text-accent font-bold">#{activeButtonIndex + 1}</div>
-                      <h3 className="text-lg font-bold">Konfiguracja Przycisku: {currentBtn.label}</h3>
+                      <h3 className="text-lg font-bold">{t.tickets.buttonConfig}: {currentBtn.label}</h3>
                     </div>
                     <button onClick={() => { setButtons(buttons.filter(b => b.id !== currentBtn.id)); setActiveButtonIndex(0); }} className="p-2.5 hover:bg-rose-500/10 text-rose-400 rounded-xl transition-colors border border-border">
                       <Trash2 className="w-5 h-5" />
@@ -408,12 +408,12 @@ export default function EditTicketPanelPage() {
                       <input type="text" value={currentBtn.emoji} onChange={(e) => updateButton(currentBtn.id, { emoji: e.target.value })} className="w-full bg-background-tertiary border border-border rounded-xl px-4 py-2.5 text-sm outline-none text-center" />
                     </div>
                     <div className="space-y-2">
-                      <label className="text-[10px] font-bold text-foreground-subtle uppercase">Kolor Przycisku</label>
+                      <label className="text-[10px] font-bold text-foreground-subtle uppercase">{t.tickets.buttonStyle}</label>
                       <select value={currentBtn.style} onChange={(e) => updateButton(currentBtn.id, { style: e.target.value as any })} className="w-full bg-background-tertiary border border-border rounded-xl px-4 py-2.5 text-sm outline-none text-foreground cursor-pointer">
-                        <option value="PRIMARY">Niebieski</option>
-                        <option value="SECONDARY">Szary</option>
-                        <option value="SUCCESS">Zielony</option>
-                        <option value="DANGER">Czerwony</option>
+                        <option value="PRIMARY">{t.tickets.blue}</option>
+                        <option value="SECONDARY">{t.tickets.gray}</option>
+                        <option value="SUCCESS">{t.tickets.green}</option>
+                        <option value="DANGER">{t.tickets.red}</option>
                       </select>
                     </div>
                   </div>
@@ -423,9 +423,9 @@ export default function EditTicketPanelPage() {
                       <label className="text-[10px] font-bold text-foreground-subtle uppercase flex items-center gap-2"><Send className="w-3 h-3" /> Akcje po kliknięciu</label>
                       <div className="grid grid-cols-3 gap-4">
                           {[
-                            { id: 'OPEN_TICKET', label: 'Stwórz Ticket', icon: Ticket, color: 'text-blue-400' },
-                            { id: 'ADD_ROLE', label: 'Nadaj Role', icon: UserPlus, color: 'text-emerald-400' },
-                            { id: 'SEND_MESSAGE', label: 'Wyślij Wiadomość', icon: MessageCircle, color: 'text-amber-400' },
+                            { id: 'OPEN_TICKET', label: t.tickets.createTicketAction, icon: Ticket, color: 'text-blue-400' },
+                            { id: 'ADD_ROLE', label: t.tickets.addRolesAction, icon: UserPlus, color: 'text-emerald-400' },
+                            { id: 'SEND_MESSAGE', label: t.tickets.sendMessageAction, icon: MessageCircle, color: 'text-amber-400' },
                           ].map(act => {
                             const active = (currentBtn.actions || []).includes(act.id as TicketAction);
                             return (
@@ -443,8 +443,8 @@ export default function EditTicketPanelPage() {
                         {(currentBtn.actions || []).includes('OPEN_TICKET') && (
                           <div className="space-y-6 p-6 bg-blue-500/5 rounded-3xl border border-blue-500/10">
                             <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-2 text-blue-400 text-[10px] font-bold uppercase"><Ticket className="w-4 h-4" /> Konfiguracja Nowego Ticketu</div>
-                                <button onClick={() => setPreviewMode('TICKET')} className="text-[10px] font-bold px-3 py-1 bg-blue-500/20 text-blue-400 rounded-lg hover:bg-blue-500/30 transition-all">PODGLĄD TICKETU</button>
+                                <div className="flex items-center gap-2 text-blue-400 text-[10px] font-bold uppercase"><Ticket className="w-4 h-4" /> {t.tickets.ticketConfig}</div>
+                                <button onClick={() => setPreviewMode('TICKET')} className="text-[10px] font-bold px-3 py-1 bg-blue-500/20 text-blue-400 rounded-lg hover:bg-blue-500/30 transition-all">{t.tickets.preview.toUpperCase()}</button>
                             </div>
                             
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -460,7 +460,7 @@ export default function EditTicketPanelPage() {
                                   
                                   <div className="space-y-2">
                                     <label className="text-[10px] font-bold text-foreground-subtle uppercase flex items-center gap-2">
-                                      <Hash className="w-3.5 h-3.5" /> Format nazwy kanału
+                                      <Hash className="w-3.5 h-3.5" /> {t.tickets.namingFormat}
                                     </label>
                                     <input 
                                       type="text" 
@@ -496,7 +496,7 @@ export default function EditTicketPanelPage() {
                                   {currentBtn.showStaffButton && (
                                     <div className="space-y-2 p-4 bg-background-tertiary/50 rounded-2xl border border-border/50">
                                         <label className="text-[10px] font-bold text-amber-400 uppercase flex items-center gap-2">
-                                          <Megaphone className="w-3.5 h-3.5" /> Wiadomość przy wezwaniu (Staff Call)
+                                          <Megaphone className="w-3.5 h-3.5" /> {t.tickets.staffMessage}
                                         </label>
                                         <textarea 
                                           value={currentBtn.staffMessage} 
@@ -510,7 +510,7 @@ export default function EditTicketPanelPage() {
                                 </div>
 
                                 <div className="space-y-4 bg-background-tertiary/50 p-6 rounded-2xl border border-border/50">
-                                  <label className="text-[10px] font-bold text-foreground-subtle uppercase block mb-4 text-center">Wiadomość Powitalna (Wewnątrz Ticketu)</label>
+                                  <label className="text-[10px] font-bold text-foreground-subtle uppercase block mb-4 text-center">{t.tickets.welcomeMessage} (Wewnątrz Ticketu)</label>
                                   <div className="space-y-4">
                                       <div className="flex items-center justify-between p-2.5 bg-blue-500/10 rounded-xl border border-blue-500/20">
                                         <div className="flex items-center gap-2">
@@ -558,13 +558,13 @@ export default function EditTicketPanelPage() {
 
                         {(currentBtn.actions || []).includes('ADD_ROLE') && (
                           <div className="p-6 bg-emerald-500/5 rounded-3xl border border-emerald-500/10">
-                            <RoleSelector label="Rangi nadawane po kliknięciu" icon={UserPlus} allRoles={roles} selectedIds={currentBtn.addRoleIds} onChange={(ids: any) => updateButton(currentBtn.id, { addRoleIds: ids })} />
+                            <RoleSelector label={t.tickets.addRole} icon={UserPlus} allRoles={roles} selectedIds={currentBtn.addRoleIds} onChange={(ids: any) => updateButton(currentBtn.id, { addRoleIds: ids })} />
                           </div>
                         )}
 
                         {(currentBtn.actions || []).includes('SEND_MESSAGE') && !(currentBtn.actions || []).includes('OPEN_TICKET') && (
                           <div className="p-6 bg-amber-500/5 rounded-3xl border border-amber-500/10 space-y-2">
-                              <label className="text-[10px] font-bold text-amber-400 uppercase">Wiadomość Prywatna</label>
+                              <label className="text-[10px] font-bold text-amber-400 uppercase">{t.tickets.sendMessage}</label>
                               <textarea value={currentBtn.message} onChange={(e) => updateButton(currentBtn.id, { message: e.target.value })} className="w-full bg-background-tertiary border border-border rounded-xl px-4 py-3 text-sm outline-none resize-none h-24" />
                           </div>
                         )}

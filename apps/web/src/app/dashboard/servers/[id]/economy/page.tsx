@@ -4,6 +4,7 @@ import { Coins, Loader2, AlertCircle } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { api } from '@/lib/api';
+import { useTranslation } from '@/providers/LanguageProvider';
 
 export default function EconomyPage() {
   const params = useParams();
@@ -11,6 +12,7 @@ export default function EconomyPage() {
   const [config, setConfig] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (!serverId) return;
@@ -20,7 +22,7 @@ export default function EconomyPage() {
         setIsLoading(false);
       })
       .catch(err => {
-        setError('Nie udało się pobrać konfiguracji Ekonomii');
+        setError(t.common.error);
         setIsLoading(false);
       });
   }, [serverId]);
@@ -38,12 +40,12 @@ export default function EconomyPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold flex items-center gap-3">
-            <Coins className="w-7 h-7 text-emerald-400" /> Ekonomia
+            <Coins className="w-7 h-7 text-emerald-400" /> {t.economy.title}
           </h1>
-          <p className="text-foreground-secondary mt-1">Zarządzaj wirtualną walutą na swoim serwerze.</p>
+          <p className="text-foreground-secondary mt-1">{t.economy.description}</p>
         </div>
         <button className="btn-primary bg-emerald-500 hover:bg-emerald-600 text-white border-transparent">
-          Zapisz Zmiany
+          {t.common.saveChanges}
         </button>
       </div>
 
