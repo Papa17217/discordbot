@@ -53,7 +53,7 @@ export class AdminController {
 
 
   @Get('users')
-  @Roles(Role.OWNER, Role.ADMIN)
+  @Roles(Role.OWNER, Role.ADMIN, Role.SUPER_ADMIN)
   @ApiOperation({ summary: 'Pobierz listę wszystkich użytkowników' })
   async getUsers() {
     return this.prisma.user.findMany({
@@ -75,7 +75,7 @@ export class AdminController {
   }
 
   @Patch('users/:id/role')
-  @Roles(Role.OWNER)
+  @Roles(Role.OWNER, Role.SUPER_ADMIN)
   @ApiOperation({ summary: 'Zmień rolę użytkownika (tylko dla OWNER)' })
   async updateUserRole(
     @Param('id') userId: string,
@@ -88,7 +88,7 @@ export class AdminController {
   }
 
   @Get('stats')
-  @Roles(Role.OWNER, Role.ADMIN)
+  @Roles(Role.OWNER, Role.ADMIN, Role.SUPER_ADMIN)
   @ApiOperation({ summary: 'Pobierz statystyki globalne platformy' })
   async getGlobalStats() {
     const [userCount, guildCount, ticketCount, botsStatus] = await Promise.all([
@@ -126,14 +126,14 @@ export class AdminController {
 
 
   @Get('config')
-  @Roles(Role.OWNER, Role.ADMIN)
+  @Roles(Role.OWNER, Role.ADMIN, Role.SUPER_ADMIN)
   @ApiOperation({ summary: 'Pobierz ustawienia globalne' })
   async getGlobalConfig() {
     return this.prisma.globalConfig.findMany();
   }
 
   @Patch('config')
-  @Roles(Role.OWNER, Role.ADMIN)
+  @Roles(Role.OWNER, Role.ADMIN, Role.SUPER_ADMIN)
   @ApiOperation({ summary: 'Zaktualizuj ustawienia globalne' })
   async updateGlobalConfig(
     @Body() config: { key: string, value: string, description?: string }[]
@@ -154,7 +154,7 @@ export class AdminController {
   // ══════════════════════════════════════════
 
   @Get('whitelist')
-  @Roles(Role.OWNER, Role.ADMIN)
+  @Roles(Role.OWNER, Role.ADMIN, Role.SUPER_ADMIN)
   @ApiOperation({ summary: 'Pobierz whitelistę (opcjonalnie per bot)' })
   async getWhitelist(@Query('bot') bot?: string) {
     const where = bot ? { botType: bot as BotType } : {};
@@ -176,7 +176,7 @@ export class AdminController {
   }
 
   @Post('whitelist')
-  @Roles(Role.OWNER)
+  @Roles(Role.OWNER, Role.SUPER_ADMIN)
   @ApiOperation({ summary: 'Dodaj użytkownika do whitelisty' })
   async addToWhitelist(
     @Body() body: { userId: string; botType: BotType },
@@ -209,7 +209,7 @@ export class AdminController {
   }
 
   @Delete('whitelist/:userId/:botType')
-  @Roles(Role.OWNER)
+  @Roles(Role.OWNER, Role.SUPER_ADMIN)
   @ApiOperation({ summary: 'Usuń użytkownika z whitelisty' })
   async removeFromWhitelist(
     @Param('userId') userId: string,
@@ -227,7 +227,7 @@ export class AdminController {
   }
 
   @Post('whitelist/bulk')
-  @Roles(Role.OWNER)
+  @Roles(Role.OWNER, Role.SUPER_ADMIN)
   @ApiOperation({ summary: 'Masowe dodanie/usunięcie whitelisty' })
   async bulkWhitelist(
     @Body() body: { userId: string; botType: BotType; action: 'add' | 'remove' }[],

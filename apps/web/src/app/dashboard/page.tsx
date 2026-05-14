@@ -14,6 +14,7 @@ const anim = { hidden: { opacity: 0, y: 15 }, show: { opacity: 1, y: 0 } };
 export default function DashboardPage() {
   const [data, setData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const { t } = useTranslation();
 
   useEffect(() => {
@@ -24,9 +25,15 @@ export default function DashboardPage() {
 
   const fetchStats = async () => {
     try {
+      setLoadError(null);
       const res = await api.get('/admin/stats');
       setData(res.data);
-    } catch (err) {
+    } catch (err: any) {
+      const msg =
+        err?.response?.status === 403
+          ? 'Brak uprawnień do statystyk (wymagana rola OWNER / ADMIN).'
+          : err?.message || t.common.error;
+      setLoadError(msg);
       toast.error(t.common.error);
     } finally {
       setIsLoading(false);
@@ -35,6 +42,18 @@ export default function DashboardPage() {
 
   if (isLoading) {
     return <div className="flex justify-center items-center h-[60vh]"><Loader2 className="w-8 h-8 animate-spin text-accent" /></div>;
+  }
+
+  if (loadError && !data) {
+    return (
+      <div className="glass-card p-8 max-w-lg mx-auto mt-12 text-center space-y-4">
+        <p className="text-rose-400 font-medium">Nie udało się pobrać danych dashboardu</p>
+        <p className="text-sm text-foreground-secondary">{loadError}</p>
+        <button type="button" onClick={() => { setIsLoading(true); fetchStats(); }} className="btn-primary">
+          Spróbuj ponownie
+        </button>
+      </div>
+    );
   }
 
   const stats = [
