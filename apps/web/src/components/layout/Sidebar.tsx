@@ -113,6 +113,18 @@ export function Sidebar() {
         </button>
       </div>
 
+      {/* Aktywna instancja bota — kanały / tickety / panele idą na wybranego bota */}
+      <div className={cn('px-3 py-3 border-b border-border shrink-0', sidebarCollapsed && 'px-2')}>
+        {!sidebarCollapsed && (
+          <p className="text-[10px] font-bold text-foreground-subtle uppercase tracking-wider mb-2 px-1">
+            Aktywny bot
+          </p>
+        )}
+        <div className={cn(!sidebarCollapsed && 'w-full')}>
+          <BotSwitcher collapsed={sidebarCollapsed} />
+        </div>
+      </div>
+
       {/* Navigation */}
       <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
         {isServerPage && !sidebarCollapsed && (
