@@ -1,7 +1,8 @@
-import { Controller, Get, Patch, Post, Param, Body, Delete, NotFoundException } from '@nestjs/common';
+import { Controller, Get, Patch, Post, Param, Body, Delete, NotFoundException, Headers } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { ConfigManagerService } from './config.service';
 import { BotService } from '../bot/bot.service';
+import { parseActiveBotHeader } from '../../common/utils/active-bot.util';
 
 @ApiTags('config')
 @ApiBearerAuth()
@@ -156,8 +157,10 @@ export class ConfigManagerController {
   @ApiOperation({ summary: 'Wyślij lub zaktualizuj panel na Discordzie' })
   async deployReactionPanel(
     @Param('guildId') guildId: string,
-    @Param('panelId') panelId: string
+    @Param('panelId') panelId: string,
+    @Headers('x-active-bot') activeBotHeader?: string,
   ) {
+    const bot = parseActiveBotHeader(activeBotHeader);
     const [guild, panel] = await Promise.all([
       this.configService.getGuildById(guildId),
       this.configService.getReactionPanel(panelId)
@@ -194,14 +197,16 @@ export class ConfigManagerController {
           panel.channelId,
           panel.messageId,
           embed,
-          panel.buttons
+          panel.buttons,
+          bot,
         );
       } catch (err) {
         result = await this.botService.sendReactionPanel(
           guild.discordId,
           panel.channelId,
           embed,
-          panel.buttons
+          panel.buttons,
+          bot,
         );
       }
     } else {
@@ -209,7 +214,8 @@ export class ConfigManagerController {
         guild.discordId,
         panel.channelId,
         embed,
-        panel.buttons
+        panel.buttons,
+        bot,
       );
     }
 

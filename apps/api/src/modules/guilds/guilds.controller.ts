@@ -1,7 +1,8 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import { Controller, Get, Param, Headers } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { GuildsService } from './guilds.service';
 import { CurrentUser } from '../../common/decorators';
+import { parseActiveBotHeader } from '../../common/utils/active-bot.util';
 
 @ApiTags('guilds')
 @ApiBearerAuth()
@@ -38,15 +39,15 @@ export class GuildsController {
 
   @Get(':id/channels')
   @ApiOperation({ summary: 'Pobierz kanały serwera' })
-  async getChannels(@Param('id') id: string) {
-    const channels = await this.guildsService.getChannels(id);
+  async getChannels(@Param('id') id: string, @Headers('x-active-bot') activeBot?: string) {
+    const channels = await this.guildsService.getChannels(id, parseActiveBotHeader(activeBot));
     return { success: true, data: channels };
   }
 
   @Get(':id/roles')
   @ApiOperation({ summary: 'Pobierz role serwera' })
-  async getRoles(@Param('id') id: string) {
-    const roles = await this.guildsService.getRoles(id);
+  async getRoles(@Param('id') id: string, @Headers('x-active-bot') activeBot?: string) {
+    const roles = await this.guildsService.getRoles(id, parseActiveBotHeader(activeBot));
     return { success: true, data: roles };
   }
 }

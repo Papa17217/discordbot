@@ -38,6 +38,7 @@ model User {
   subscriptions    Subscription[]
   sessions         Session[]
   commandUsages    CommandUsage[]
+  botWhitelist     BotWhitelist[]
 
   @@index([discordId])
   @@map("users")
@@ -737,4 +738,25 @@ enum TicketAction {
   OPEN_TICKET
   ADD_ROLE
   SEND_MESSAGE
+}
+
+enum BotType {
+  PRIVATE
+  PUBLIC
+}
+
+// ── Bot Whitelist ──────────────────────────
+
+model BotWhitelist {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  botType   BotType
+  addedBy   String   // discordId osoby która dodała
+
+  createdAt DateTime @default(now())
+
+  @@unique([userId, botType])
+  @@index([botType])
+  @@map("bot_whitelist")
 }

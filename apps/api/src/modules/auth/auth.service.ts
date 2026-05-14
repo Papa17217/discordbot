@@ -164,17 +164,23 @@ export class AuthService {
 
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
+      include: {
+        botWhitelist: {
+          select: { botType: true },
+        },
+      },
     });
 
     if (!user) return null;
 
-    const authUser: IAuthUser = {
+    const authUser: IAuthUser & { whitelist?: string[] } = {
       id: user.id,
       discordId: user.discordId,
       username: user.username,
       avatar: user.avatar,
       role: user.role as any,
       subscription: user.subscription as any,
+      whitelist: user.botWhitelist.map((w: any) => w.botType),
     };
 
     // Cache na 2 minuty

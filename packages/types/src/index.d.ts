@@ -300,6 +300,8 @@ export interface IAuthUser {
     avatar: string | null;
     role: PermissionLevel;
     subscription: SubscriptionTier;
+    /** Bot whitelist entries from API (e.g. PRIVATE, PUBLIC) */
+    whitelist?: string[];
 }
 export interface IDiscordOAuthUser {
     id: string;

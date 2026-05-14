@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, Logger } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
-import { BotService } from '../bot/bot.service';
+import { BotService, type BotType } from '../bot/bot.service';
 import { randomUUID } from 'crypto';
 
 @Injectable()
@@ -29,7 +29,7 @@ export class PanelsService {
     return panel;
   }
 
-  async createPanel(guildId: string, data: any) {
+  async createPanel(guildId: string, data: any, bot: BotType = 'private') {
     const { title, description, color, footer, thumbnail, image, channelId, buttons, style, placeholder } = data;
 
     const panel = await this.prisma.ticketPanel.create({
@@ -89,7 +89,7 @@ export class PanelsService {
         image: panel.image,
         style: panel.style,
         placeholder: panel.placeholder,
-      }, panel.buttons) as any;
+      }, panel.buttons, bot) as any;
 
       await this.prisma.ticketPanel.update({
         where: { id: panel.id },
@@ -103,7 +103,7 @@ export class PanelsService {
     }
   }
 
-  async updatePanel(panelId: string, data: any) {
+  async updatePanel(panelId: string, data: any, bot: BotType = 'private') {
     const { title, description, color, footer, thumbnail, image, channelId, buttons, style, placeholder } = data;
 
     // 1. Znajdź stary panel
@@ -169,7 +169,8 @@ export class PanelsService {
             updated.channelId,
             updated.messageId,
             { title, description, color, footer, thumbnail, image, style: updated.style, placeholder: updated.placeholder },
-            updated.buttons
+            updated.buttons,
+            bot,
           );
         }
       } catch (error: any) {

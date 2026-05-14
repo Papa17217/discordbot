@@ -1,12 +1,23 @@
-import { Controller, Get, Patch, Body, Param, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Patch,
+  Post,
+  Body,
+  Param,
+  UseGuards,
+  Query,
+  Delete,
+  Headers,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { PrismaService } from '../../prisma/prisma.service';
 import { BotService } from '../bot/bot.service';
-import { Roles, Public } from '../../common/decorators';
+import { Roles, Public, CurrentUser } from '../../common/decorators';
 import { RolesGuard } from '../../common/guards/roles.guard';
-import { Role } from '@prisma/client';
+import { Role, BotType } from '@prisma/client';
 import { EventsGateway } from '../websocket/events.gateway';
-import { Post, Headers, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
 @ApiTags('admin')
@@ -25,13 +36,14 @@ export class AdminController {
   @Post('logs')
   @ApiOperation({ summary: 'Przyjmij logi z bota (tylko dla bota)' })
   async ingestLogs(
-
     @Body() log: { level: string; message: string; timestamp: string },
     @Headers('x-bot-token') token: string,
   ) {
     console.log('📥 Otrzymano log z bota:', log.message);
-    // Prosta weryfikacja czy to na pewno bot
-    if (token !== this.config.get('DISCORD_TOKEN')) {
+    // Weryfikacja — akceptujemy tokeny obu botów
+    const privateToken = this.config.get('DISCORD_TOKEN');
+    const publicToken = this.config.get('DISCORD_TOKEN_PUBLIC');
+    if (token !== privateToken && token !== publicToken) {
       throw new UnauthorizedException('Błędny token bota');
     }
 
@@ -53,6 +65,11 @@ export class AdminController {
         avatar: true,
         role: true,
         createdAt: true,
+        botWhitelist: {
+          select: {
+            botType: true,
+          },
+        },
       },
     });
   }
@@ -74,14 +91,13 @@ export class AdminController {
   @Roles(Role.OWNER, Role.ADMIN)
   @ApiOperation({ summary: 'Pobierz statystyki globalne platformy' })
   async getGlobalStats() {
-    const [userCount, guildCount, ticketCount, botStatus] = await Promise.all([
+    const [userCount, guildCount, ticketCount, botsStatus] = await Promise.all([
       this.prisma.user.count(),
       this.prisma.guild.count(),
       this.prisma.ticket.count(),
-      this.botService.getBotStatus(),
+      this.botService.getAllBotsStatus(),
     ]);
 
-    // Pobierz ostatnie akcje (np. ostatnie utworzone tickety)
     const recentTickets = await this.prisma.ticket.findMany({
       take: 5,
       orderBy: { createdAt: 'desc' },
@@ -96,7 +112,8 @@ export class AdminController {
       users: userCount,
       guilds: guildCount,
       tickets: ticketCount,
-      bot: botStatus,
+      bot: botsStatus.private,
+      bots: botsStatus,
       recentActions: recentTickets.map(t => ({
         action: 'TICKET_OPEN',
         user: t.user.username,
@@ -131,5 +148,122 @@ export class AdminController {
     await Promise.all(upserts);
     return { success: true };
   }
-}
 
+  // ══════════════════════════════════════════
+  // WHITELIST MANAGEMENT
+  // ══════════════════════════════════════════
+
+  @Get('whitelist')
+  @Roles(Role.OWNER, Role.ADMIN)
+  @ApiOperation({ summary: 'Pobierz whitelistę (opcjonalnie per bot)' })
+  async getWhitelist(@Query('bot') bot?: string) {
+    const where = bot ? { botType: bot as BotType } : {};
+    return this.prisma.botWhitelist.findMany({
+      where,
+      include: {
+        user: {
+          select: {
+            id: true,
+            discordId: true,
+            username: true,
+            avatar: true,
+            role: true,
+          },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  @Post('whitelist')
+  @Roles(Role.OWNER)
+  @ApiOperation({ summary: 'Dodaj użytkownika do whitelisty' })
+  async addToWhitelist(
+    @Body() body: { userId: string; botType: BotType },
+    @CurrentUser('discordId') addedBy: string,
+  ) {
+    return this.prisma.botWhitelist.upsert({
+      where: {
+        userId_botType: {
+          userId: body.userId,
+          botType: body.botType,
+        },
+      },
+      update: {},
+      create: {
+        userId: body.userId,
+        botType: body.botType,
+        addedBy,
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            discordId: true,
+            username: true,
+            avatar: true,
+          },
+        },
+      },
+    });
+  }
+
+  @Delete('whitelist/:userId/:botType')
+  @Roles(Role.OWNER)
+  @ApiOperation({ summary: 'Usuń użytkownika z whitelisty' })
+  async removeFromWhitelist(
+    @Param('userId') userId: string,
+    @Param('botType') botType: BotType,
+  ) {
+    await this.prisma.botWhitelist.delete({
+      where: {
+        userId_botType: {
+          userId,
+          botType,
+        },
+      },
+    });
+    return { success: true };
+  }
+
+  @Post('whitelist/bulk')
+  @Roles(Role.OWNER)
+  @ApiOperation({ summary: 'Masowe dodanie/usunięcie whitelisty' })
+  async bulkWhitelist(
+    @Body() body: { userId: string; botType: BotType; action: 'add' | 'remove' }[],
+    @CurrentUser('discordId') addedBy: string,
+  ) {
+    const results = [];
+    for (const item of body) {
+      if (item.action === 'add') {
+        const result = await this.prisma.botWhitelist.upsert({
+          where: {
+            userId_botType: {
+              userId: item.userId,
+              botType: item.botType,
+            },
+          },
+          update: {},
+          create: {
+            userId: item.userId,
+            botType: item.botType,
+            addedBy,
+          },
+        });
+        results.push(result);
+      } else {
+        try {
+          await this.prisma.botWhitelist.delete({
+            where: {
+              userId_botType: {
+                userId: item.userId,
+                botType: item.botType,
+              },
+            },
+          });
+        } catch {}
+      }
+    }
+    return { success: true, count: results.length };
+  }
+}

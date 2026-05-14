@@ -15,9 +15,14 @@ export const api = axios.create({
 
 // Request interceptor — dodaj token
 api.interceptors.request.use((config) => {
-  const token = useAuthStore.getState().accessToken;
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+  const { accessToken, activeBotType } = useAuthStore.getState();
+  if (accessToken) {
+    config.headers.Authorization = `Bearer ${accessToken}`;
+  }
+  // Który most bota (prywatny vs publiczny) ma obsłużyć akcję Discord
+  const bot = activeBotType?.toLowerCase();
+  if (bot === 'private' || bot === 'public') {
+    config.headers['x-active-bot'] = bot;
   }
   return config;
 });

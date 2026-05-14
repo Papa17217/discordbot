@@ -19,6 +19,7 @@ import { useUIStore } from '@/stores/uiStore';
 import { useAuthStore } from '@/stores/authStore';
 import { getDiscordAvatarUrl } from '@/lib/utils';
 import { useTranslation } from '@/providers/LanguageProvider';
+import { BotSwitcher } from '@/components/BotSwitcher';
 
 const useNavigation = () => {
   const { t } = useTranslation();

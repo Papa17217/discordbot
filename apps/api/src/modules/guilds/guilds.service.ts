@@ -2,7 +2,7 @@ import { Injectable, NotFoundException, ForbiddenException, UnauthorizedExceptio
 import { PrismaService } from '../../prisma/prisma.service';
 import { RedisService } from '../../redis/redis.service';
 import { ConfigService } from '@nestjs/config';
-import { BotService } from '../bot/bot.service';
+import { BotService, type BotType } from '../bot/bot.service';
 
 @Injectable()
 export class GuildsService {
@@ -185,21 +185,21 @@ export class GuildsService {
     return stats;
   }
 
-  async getChannels(guildId: string) {
+  async getChannels(guildId: string, bot: BotType = 'private') {
     const guild = await this.prisma.guild.findUnique({
       where: { id: guildId },
       select: { discordId: true },
     });
     if (!guild) throw new NotFoundException('Serwer nie znaleziony');
-    return this.botService.getGuildChannels(guild.discordId);
+    return this.botService.getGuildChannels(guild.discordId, bot);
   }
 
-  async getRoles(guildId: string) {
+  async getRoles(guildId: string, bot: BotType = 'private') {
     const guild = await this.prisma.guild.findUnique({
       where: { id: guildId },
       select: { discordId: true },
     });
     if (!guild) throw new NotFoundException('Serwer nie znaleziony');
-    return this.botService.getGuildRoles(guild.discordId);
+    return this.botService.getGuildRoles(guild.discordId, bot);
   }
 }

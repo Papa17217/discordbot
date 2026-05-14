@@ -12,18 +12,23 @@ interface AuthUser {
   avatar: string | null;
   role: string;
   subscription: string;
+  whitelist?: string[]; // ['PRIVATE', 'PUBLIC']
 }
+
+type BotType = 'PRIVATE' | 'PUBLIC';
 
 interface AuthState {
   user: AuthUser | null;
   accessToken: string | null;
   isAuthenticated: boolean;
   isLoading: boolean;
+  activeBotType: BotType;
   setUser: (user: AuthUser) => void;
   setAccessToken: (token: string) => void;
   login: (user: AuthUser, token: string) => void;
   logout: () => void;
   setLoading: (loading: boolean) => void;
+  setActiveBotType: (botType: BotType) => void;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -33,6 +38,7 @@ export const useAuthStore = create<AuthState>()(
       accessToken: null,
       isAuthenticated: false,
       isLoading: true,
+      activeBotType: 'PRIVATE' as BotType,
 
       setUser: (user) => set({ user, isAuthenticated: true }),
       setAccessToken: (accessToken) => set({ accessToken }),
@@ -44,6 +50,7 @@ export const useAuthStore = create<AuthState>()(
         set({ user: null, accessToken: null, isAuthenticated: false, isLoading: false }),
 
       setLoading: (isLoading) => set({ isLoading }),
+      setActiveBotType: (activeBotType) => set({ activeBotType }),
     }),
     {
       name: 'discord-saas-auth',
@@ -51,6 +58,7 @@ export const useAuthStore = create<AuthState>()(
         user: state.user,
         accessToken: state.accessToken,
         isAuthenticated: state.isAuthenticated,
+        activeBotType: state.activeBotType,
       }),
     },
   ),
