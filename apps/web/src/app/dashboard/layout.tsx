@@ -4,12 +4,13 @@
 
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { Topbar } from '@/components/layout/Topbar';
 import { useAuthStore } from '@/stores/authStore';
 import { useUIStore } from '@/stores/uiStore';
+import { useAuthPersistHydrated } from '@/hooks/useAuthPersistHydrated';
 import { cn } from '@/lib/utils';
 import { Loader2 } from 'lucide-react';
 
@@ -23,17 +24,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const router = useRouter();
   const { isAuthenticated, isLoading, setLoading, user } = useAuthStore();
   const { sidebarCollapsed } = useUIStore();
-  const [hasHydrated, setHasHydrated] = useState(() => useAuthStore.persist.hasHydrated());
-
-  useEffect(() => {
-    const unsub = useAuthStore.persist.onFinishHydration(() => {
-      setHasHydrated(true);
-    });
-    if (useAuthStore.persist.hasHydrated()) {
-      setHasHydrated(true);
-    }
-    return unsub;
-  }, []);
+  const hasHydrated = useAuthPersistHydrated();
 
   useEffect(() => {
     if (!hasHydrated) return;

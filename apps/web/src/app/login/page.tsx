@@ -4,10 +4,11 @@
 
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Bot, ArrowRight } from 'lucide-react';
 import { useAuthStore } from '@/stores/authStore';
+import { useAuthPersistHydrated } from '@/hooks/useAuthPersistHydrated';
 
 const DASHBOARD_ROLES = ['OWNER', 'ADMIN', 'SUPER_ADMIN'] as const;
 
@@ -15,13 +16,7 @@ export default function LoginPage() {
   const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
   const router = useRouter();
   const { isAuthenticated, user } = useAuthStore();
-  const [hasHydrated, setHasHydrated] = useState(() => useAuthStore.persist.hasHydrated());
-
-  useEffect(() => {
-    const unsub = useAuthStore.persist.onFinishHydration(() => setHasHydrated(true));
-    if (useAuthStore.persist.hasHydrated()) setHasHydrated(true);
-    return unsub;
-  }, []);
+  const hasHydrated = useAuthPersistHydrated();
 
   useEffect(() => {
     if (!hasHydrated) return;
