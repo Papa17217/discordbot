@@ -4,7 +4,7 @@
 
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { Topbar } from '@/components/layout/Topbar';
@@ -13,26 +13,44 @@ import { useUIStore } from '@/stores/uiStore';
 import { cn } from '@/lib/utils';
 import { Loader2 } from 'lucide-react';
 
+const DASHBOARD_ROLES = ['OWNER', 'ADMIN', 'SUPER_ADMIN'] as const;
+
+function canAccessDashboard(user: { role: string } | null) {
+  return !!user && DASHBOARD_ROLES.includes(user.role as (typeof DASHBOARD_ROLES)[number]);
+}
+
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const { isAuthenticated, isLoading, setLoading, user } = useAuthStore();
   const { sidebarCollapsed } = useUIStore();
+  const [hasHydrated, setHasHydrated] = useState(() => useAuthStore.persist.hasHydrated());
 
   useEffect(() => {
-    // Sprawdź auth po załadowaniu store z localStorage
+    const unsub = useAuthStore.persist.onFinishHydration(() => {
+      setHasHydrated(true);
+    });
+    if (useAuthStore.persist.hasHydrated()) {
+      setHasHydrated(true);
+    }
+    return unsub;
+  }, []);
+
+  useEffect(() => {
+    if (!hasHydrated) return;
+
     setLoading(false);
+
     if (!isAuthenticated) {
-      router.push('/login');
+      router.replace('/login');
       return;
     }
 
-    // Ograniczenie dashboardu tylko dla OWNER / ADMIN (zgodnie z prośbą użytkownika)
-    if (user && !['OWNER', 'ADMIN'].includes(user.role)) {
-      router.push('/'); // Przekieruj na stronę główną jeśli nie ma uprawnień
+    if (user && !canAccessDashboard(user)) {
+      router.replace('/');
     }
-  }, [isAuthenticated, user, router, setLoading]);
+  }, [hasHydrated, isAuthenticated, user, router, setLoading]);
 
-  if (isLoading) {
+  if (isLoading || !hasHydrated) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Loader2 className="w-8 h-8 text-accent animate-spin" />
@@ -40,7 +58,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     );
   }
 
-  if (!isAuthenticated || (user && !['OWNER', 'ADMIN'].includes(user.role))) return null;
+  if (!isAuthenticated || (user && !canAccessDashboard(user))) return null;
 
   return (
     <div className="min-h-screen bg-background">

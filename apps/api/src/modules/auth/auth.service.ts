@@ -162,16 +162,28 @@ export class AuthService {
     const cached = await this.redis.getJson<IAuthUser>(`user:${userId}`);
     if (cached) return cached;
 
-    const user = await this.prisma.user.findUnique({
-      where: { id: userId },
-      include: {
-        botWhitelist: {
-          select: { botType: true },
+    let user: any = null;
+
+    try {
+      user = await this.prisma.user.findUnique({
+        where: { id: userId },
+        include: {
+          botWhitelist: {
+            select: { botType: true },
+          },
         },
-      },
-    });
+      });
+    } catch {
+      user = await this.prisma.user.findUnique({
+        where: { id: userId },
+      });
+    }
 
     if (!user) return null;
+
+    const whitelist = Array.isArray(user.botWhitelist)
+      ? user.botWhitelist.map((w: { botType: string }) => w.botType)
+      : [];
 
     const authUser: IAuthUser & { whitelist?: string[] } = {
       id: user.id,
@@ -180,7 +192,7 @@ export class AuthService {
       avatar: user.avatar,
       role: user.role as any,
       subscription: user.subscription as any,
-      whitelist: user.botWhitelist.map((w: any) => w.botType),
+      whitelist,
     };
 
     // Cache na 2 minuty

@@ -4,10 +4,31 @@
 
 'use client';
 
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Bot, ArrowRight } from 'lucide-react';
+import { useAuthStore } from '@/stores/authStore';
+
+const DASHBOARD_ROLES = ['OWNER', 'ADMIN', 'SUPER_ADMIN'] as const;
 
 export default function LoginPage() {
   const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+  const router = useRouter();
+  const { isAuthenticated, user } = useAuthStore();
+  const [hasHydrated, setHasHydrated] = useState(() => useAuthStore.persist.hasHydrated());
+
+  useEffect(() => {
+    const unsub = useAuthStore.persist.onFinishHydration(() => setHasHydrated(true));
+    if (useAuthStore.persist.hasHydrated()) setHasHydrated(true);
+    return unsub;
+  }, []);
+
+  useEffect(() => {
+    if (!hasHydrated) return;
+    if (isAuthenticated && user && DASHBOARD_ROLES.includes(user.role as (typeof DASHBOARD_ROLES)[number])) {
+      router.replace('/dashboard');
+    }
+  }, [hasHydrated, isAuthenticated, user, router]);
 
   return (
     <div className="min-h-screen flex items-center justify-center relative">
