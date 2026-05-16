@@ -127,6 +127,8 @@ export interface IGuildPartial {
   memberCount: number;
   premium: boolean;
   botPresent: boolean;
+  activeBotPresent?: boolean;
+  availableBots?: Array<'PRIVATE' | 'PUBLIC'>;
   userPermissions: string;
 }
 

@@ -8,6 +8,7 @@ import { useTranslation } from '@/providers/LanguageProvider';
 import Link from 'next/link';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { useAuthStore } from '@/stores/authStore';
 
 type AutoModType = 'WORD_FILTER' | 'SPAM_FILTER' | 'LINK_FILTER' | 'CAPS_FILTER' | 'EMOJI_FILTER' | 'MENTION_FILTER' | 'INVITE_FILTER';
 type AutoModAction = 'DELETE' | 'WARN' | 'MUTE' | 'KICK';
@@ -82,6 +83,7 @@ const MultiSelect = ({ options, selectedIds, onChange, label, icon: Icon, placeh
 export default function AutoModPage() {
   const params = useParams();
   const serverId = params?.id as string;
+  const activeBotType = useAuthStore((state) => state.activeBotType);
   const [rules, setRules] = useState<AutoModRule[]>([]);
   const [roles, setRoles] = useState<any[]>([]);
   const [channels, setChannels] = useState<any[]>([]);
@@ -91,7 +93,7 @@ export default function AutoModPage() {
 
   useEffect(() => {
     if (serverId) loadData();
-  }, [serverId]);
+  }, [serverId, activeBotType]);
 
   const loadData = async () => {
     try {

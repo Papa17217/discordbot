@@ -7,6 +7,7 @@ import { useParams } from 'next/navigation';
 import { api } from '@/lib/api';
 import { toast } from 'sonner';
 import { useTranslation } from '@/providers/LanguageProvider';
+import { useAuthStore } from '@/stores/authStore';
 
 const formatTimeAgo = (dateStr: string) => {
   const date = new Date(dateStr);
@@ -37,6 +38,7 @@ const ACTION_METADATA: Record<ModActionType, { name: string, desc: string, icon:
 export default function ModerationPage() {
   const params = useParams();
   const serverId = params?.id as string;
+  const activeBotType = useAuthStore((state) => state.activeBotType);
   const [activeTab, setActiveTab] = useState<'logs' | 'settings'>('logs');
   const [logs, setLogs] = useState<any[]>([]);
   const [config, setConfig] = useState<any>(null);
@@ -66,7 +68,7 @@ export default function ModerationPage() {
       }
     };
     fetchData();
-  }, [serverId]);
+  }, [serverId, activeBotType]);
 
   const getDefaultConfig = () => ({
     banMessage: "Zostałeś zbanowany na serwerze {guild} za: {reason}", banTitle: "Użytkownik Zbanowany", banColor: "#f43f5e", banEnabled: true, banThumbnail: true,

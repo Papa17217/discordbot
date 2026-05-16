@@ -15,8 +15,13 @@ export class GuildsController {
   async getUserGuilds(
     @CurrentUser('id') userId: string,
     @CurrentUser('discordId') discordId: string,
+    @Headers('x-active-bot') activeBot?: string,
   ) {
-    const guilds = await this.guildsService.getUserGuilds(userId, discordId);
+    const guilds = await this.guildsService.getUserGuilds(
+      userId,
+      discordId,
+      parseActiveBotHeader(activeBot),
+    );
     return { success: true, data: guilds, timestamp: new Date().toISOString() };
   }
 

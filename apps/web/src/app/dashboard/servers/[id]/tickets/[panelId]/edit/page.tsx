@@ -7,6 +7,7 @@ import { api } from '@/lib/api';
 import Link from 'next/link';
 import { toast } from 'sonner';
 import { useTranslation } from '@/providers/LanguageProvider';
+import { useAuthStore } from '@/stores/authStore';
 
 type TicketAction = 'OPEN_TICKET' | 'ADD_ROLE' | 'SEND_MESSAGE';
 
@@ -130,6 +131,7 @@ export default function EditTicketPanelPage() {
   const router = useRouter();
   const serverId = params?.id as string;
   const panelId = params?.panelId as string;
+  const activeBotType = useAuthStore((state) => state.activeBotType);
 
   const [channels, setChannels] = useState<any[]>([]);
   const [roles, setRoles] = useState<any[]>([]);
@@ -157,7 +159,7 @@ export default function EditTicketPanelPage() {
   useEffect(() => {
     if (!serverId || !panelId) return;
     loadData();
-  }, [serverId, panelId]);
+  }, [serverId, panelId, activeBotType]);
 
   const loadData = async () => {
     try {

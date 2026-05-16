@@ -6,10 +6,12 @@ import { motion } from 'framer-motion';
 import { Users, Loader2, Shield, Search, Hash } from 'lucide-react';
 import { api } from '@/lib/api';
 import { toast } from 'sonner';
+import { useAuthStore } from '@/stores/authStore';
 
 export default function RolesPage() {
   const params = useParams();
   const serverId = params?.id as string;
+  const activeBotType = useAuthStore((state) => state.activeBotType);
   const [roles, setRoles] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -26,7 +28,7 @@ export default function RolesPage() {
           setIsLoading(false);
         });
     }
-  }, [serverId]);
+  }, [serverId, activeBotType]);
 
   const filteredRoles = roles.filter(r => r.name.toLowerCase().includes(search.toLowerCase()));
 

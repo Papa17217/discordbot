@@ -12,6 +12,7 @@ import {
 import { api } from '@/lib/api';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { useAuthStore } from '@/stores/authStore';
 
 interface ReactionButton {
   label: string;
@@ -36,6 +37,7 @@ interface ReactionPanel {
 export default function ReactionRolesPage() {
   const params = useParams();
   const serverId = params?.id as string;
+  const activeBotType = useAuthStore((state) => state.activeBotType);
 
   const [panels, setPanels] = useState<any[]>([]);
   const [channels, setChannels] = useState<any[]>([]);
@@ -49,7 +51,7 @@ export default function ReactionRolesPage() {
 
   useEffect(() => {
     if (serverId) loadData();
-  }, [serverId]);
+  }, [serverId, activeBotType]);
 
   const loadData = async () => {
     try {

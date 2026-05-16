@@ -8,20 +8,30 @@ import { useTranslation } from '@/providers/LanguageProvider';
 
 import { useEffect } from 'react';
 import { useGuildStore } from '@/stores/guildStore';
+import { useAuthStore } from '@/stores/authStore';
 import { Loader2, AlertCircle } from 'lucide-react';
 
 const anim = { hidden: { opacity: 0, y: 15 }, show: { opacity: 1, y: 0 } };
 
 export default function ServersPage() {
   const { guilds, isLoading, error, fetchGuilds } = useGuildStore();
+  const activeBotType = useAuthStore((state) => state.activeBotType);
   const { t } = useTranslation();
 
   useEffect(() => {
     fetchGuilds();
-  }, [fetchGuilds]);
+  }, [fetchGuilds, activeBotType]);
 
   const getInviteUrl = (guildId: string) => {
-    const clientId = process.env.NEXT_PUBLIC_DISCORD_CLIENT_ID || '1502726463135158322';
+    const privateClientId =
+      process.env.NEXT_PUBLIC_DISCORD_CLIENT_ID_PRIVATE ||
+      process.env.NEXT_PUBLIC_DISCORD_CLIENT_ID ||
+      '';
+    const publicClientId =
+      process.env.NEXT_PUBLIC_DISCORD_CLIENT_ID_PUBLIC ||
+      process.env.NEXT_PUBLIC_DISCORD_CLIENT_ID ||
+      '';
+    const clientId = activeBotType === 'PUBLIC' ? publicClientId : privateClientId;
     return `https://discord.com/oauth2/authorize?client_id=${clientId}&permissions=8&integration_type=0&scope=bot+applications.commands&guild_id=${guildId}&disable_guild_select=true`;
   };
 
@@ -69,10 +79,13 @@ export default function ServersPage() {
             <h3 className="text-lg font-medium">Brak serwerów</h3>
             <p className="text-foreground-secondary mt-1">Nie znaleziono żadnych serwerów, którymi zarządzasz.</p>
           </div>
-        ) : guilds.map((guild) => (
+        ) : guilds.map((guild) => {
+          const activeBotPresent = guild.activeBotPresent ?? guild.botPresent;
+
+          return (
           <motion.div key={guild.id} variants={anim}>
-            <Link href={guild.botPresent ? `/dashboard/servers/${guild.id}` : getInviteUrl(guild.discordId)} target={guild.botPresent ? "_self" : "_blank"}>
-              <div className={cn('glass-card-hover p-6 relative overflow-hidden', !guild.botPresent && 'opacity-60')}>
+            <Link href={activeBotPresent ? `/dashboard/servers/${guild.id}` : getInviteUrl(guild.discordId)} target={activeBotPresent ? "_self" : "_blank"}>
+              <div className={cn('glass-card-hover p-6 relative overflow-hidden', !activeBotPresent && 'opacity-60')}>
                 {guild.premium && (
                   <div className="absolute top-4 right-4 premium-badge">
                     <Crown className="w-3 h-3" /> Premium
@@ -93,19 +106,19 @@ export default function ServersPage() {
                     </p>
                   </div>
                 </div>
-                {guild.botPresent ? (
+                {activeBotPresent ? (
                   <div className="flex items-center gap-2 text-sm text-status-success">
                     <span className="status-dot-online" /> Bot aktywny
                   </div>
                 ) : (
                   <button className="btn-primary w-full text-sm py-2.5 flex items-center justify-center gap-2">
-                    <Plus className="w-4 h-4" /> Dodaj bota
+                    <Plus className="w-4 h-4" /> Dodaj tego bota
                   </button>
                 )}
               </div>
             </Link>
           </motion.div>
-        ))}
+        )})}
       </div>
     </motion.div>
   );

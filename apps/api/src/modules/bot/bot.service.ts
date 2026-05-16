@@ -2,6 +2,12 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
 export type BotType = 'private' | 'public';
+export interface BridgeGuildSummary {
+  id: string;
+  name: string;
+  icon: string | null;
+  memberCount: number;
+}
 
 @Injectable()
 export class BotService {
@@ -58,6 +64,19 @@ export class BotService {
       this.getBotStatus('public'),
     ]);
     return { private: privateStatus, public: publicStatus };
+  }
+
+  async getManagedGuilds(bot: BotType = 'private'): Promise<BridgeGuildSummary[]> {
+    try {
+      const response = await fetch(`${this.getUrl(bot)}/guilds`, {
+        headers: this.getHeaders(bot),
+      });
+      if (!response.ok) return [];
+      return (await response.json()) as BridgeGuildSummary[];
+    } catch (error: any) {
+      this.logger.error(`Failed to get guild list (${bot}): ${error.message}`);
+      return [];
+    }
   }
 
   // ── Guild Info ──────────────────────────────

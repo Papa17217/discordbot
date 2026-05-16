@@ -37,6 +37,17 @@ export function startBridge(client: BotClient) {
   });
 
   // ── Informacje o guildzie ────────────────
+  app.get('/guilds', (req, res) => {
+    const guilds = client.guilds.cache.map((guild) => ({
+      id: guild.id,
+      name: guild.name,
+      icon: guild.icon,
+      memberCount: guild.memberCount,
+    }));
+
+    res.json(guilds);
+  });
+
   app.get('/guilds/:guildId', (req, res) => {
     const guild = client.guilds.cache.get(req.params.guildId);
     if (!guild) {

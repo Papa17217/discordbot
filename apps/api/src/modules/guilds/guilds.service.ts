@@ -15,7 +15,7 @@ export class GuildsService {
 
   // ── Pobierz serwery użytkownika z Discord API ──
 
-  async getUserGuilds(userId: string, userDiscordId: string) {
+  async getUserGuilds(userId: string, userDiscordId: string, bot: BotType = 'private') {
     const accessToken = await this.redis.get(`discord_token:${userId}`);
     if (!accessToken) throw new UnauthorizedException('Sesja wygasła. Zaloguj się ponownie.');
 
@@ -37,9 +37,15 @@ export class GuildsService {
     });
 
     // Pobierz guildy z bazy które bot ma
-    const botGuilds = await this.prisma.guild.findMany({
-      select: { discordId: true, id: true, memberCount: true, premium: true },
-    });
+    const [botGuilds, managedGuilds] = await Promise.all([
+      this.prisma.guild.findMany({
+        select: { discordId: true, id: true, memberCount: true, premium: true },
+      }),
+      this.botService.getManagedGuilds(bot),
+    ]);
+
+    const activeBotGuildIds = new Set(managedGuilds.map((guild) => guild.id));
+    const activeBotLabel = bot === 'public' ? 'PUBLIC' : 'PRIVATE';
     
     // Zbuduj mapę serwerów z naszej bazy danych (do pobrania wewnętrznego id bazy)
     const dbGuildMap = new Map();
@@ -56,7 +62,9 @@ export class GuildsService {
         icon: guild.icon,
         memberCount: dbGuild ? dbGuild.memberCount : 0,
         premium: dbGuild ? dbGuild.premium : false,
-        botPresent: !!dbGuild,
+        botPresent: activeBotGuildIds.has(guild.id),
+        activeBotPresent: activeBotGuildIds.has(guild.id),
+        availableBots: activeBotGuildIds.has(guild.id) ? [activeBotLabel] : [],
         userPermissions: guild.permissions,
       };
     });
