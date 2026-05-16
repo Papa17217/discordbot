@@ -20,36 +20,14 @@ export default class GodzinkiCommand extends Command {
         .setDescription('System logowania szkoleń i czasu służby')
         .addSubcommand((sub) =>
           sub
-            .setName('dodaj_formularz')
-            .setDescription('Wypełnij raport szkolenia za pomocą wyskakującego formularza')
-        )
-        .addSubcommand((sub) =>
-          sub
-            .setName('dodaj_opcje')
-            .setDescription('Wypełnij raport używając opcji komendy')
-            .addStringOption((opt) => opt.setName('imie_nazwisko').setDescription('Imię i nazwisko postaci').setRequired(true))
-            .addStringOption((opt) => opt.setName('odznaka').setDescription('Numer odznaki').setRequired(true))
-            .addStringOption((opt) =>
-              opt
-                .setName('typ')
-                .setDescription('Rodzaj szkolenia')
-                .setRequired(true)
-                .addChoices(
-                  { name: 'Negocjacje (nego)', value: 'nego' },
-                  { name: 'Supervisory (sv)', value: 'sv' },
-                  { name: 'Merytoryka (mery)', value: 'mery' },
-                  { name: 'Merytoryka Oficerska (meryof)', value: 'meryof' },
-                  { name: 'Medyczne (med)', value: 'med' }
-                )
-            )
-            .addIntegerOption((opt) => opt.setName('godziny').setDescription('Ilość godzin').setRequired(true).setMinValue(0))
-            .addIntegerOption((opt) => opt.setName('minuty').setDescription('Ilość minut').setRequired(true).setMinValue(0).setMaxValue(59))
+            .setName('dodaj')
+            .setDescription('Wypełnij raport szkolenia za pomocą formularza')
         )
         .addSubcommand((sub) =>
           sub
             .setName('statystyki')
-            .setDescription('Sprawdź statystyki swoje lub innej osoby')
-            .addUserOption((opt) => opt.setName('osoba').setDescription('Osoba do sprawdzenia (zostaw puste aby sprawdzić siebie)'))
+            .setDescription('Sprawdź statystyki po numerze odznaki')
+            .addStringOption((opt) => opt.setName('odznaka').setDescription('Numer odznaki postaci').setRequired(true))
         ),
       cooldown: 5,
       module: 'utility',
@@ -76,7 +54,7 @@ export default class GodzinkiCommand extends Command {
       });
     }
 
-    if (subcommand === 'dodaj_formularz') {
+    if (subcommand === 'dodaj') {
       const modal = new ModalBuilder()
         .setCustomId('godzinki_modal')
         .setTitle('Raport ze szkolenia');
@@ -89,19 +67,21 @@ export default class GodzinkiCommand extends Command {
 
       const badgeInput = new TextInputBuilder()
         .setCustomId('godzinki_badge')
-        .setLabel('Numer odznaki')
+        .setLabel('Nr odznaki (można po przecinku, np. 12, 15)')
         .setStyle(TextInputStyle.Short)
         .setRequired(true);
 
       const typeInput = new TextInputBuilder()
         .setCustomId('godzinki_type')
-        .setLabel('Rodzaj (nego, sv, mery, meryof, med)')
+        .setLabel('Rodzaj (nego, sv, rto, pwc, ocean...)')
+        .setPlaceholder('np. doszkalanie, godziny z cadetem, merry...')
         .setStyle(TextInputStyle.Short)
         .setRequired(true);
 
       const timeInput = new TextInputBuilder()
         .setCustomId('godzinki_time')
-        .setLabel('Czas (np. 2h 30m, 1.5h, 45m)')
+        .setLabel('Czas (wpisz dokładnie, np 2h 30m)')
+        .setPlaceholder('np. 2h 30m, 1h 45m, 3h')
         .setStyle(TextInputStyle.Short)
         .setRequired(true);
 
@@ -116,55 +96,29 @@ export default class GodzinkiCommand extends Command {
       return;
     }
 
-    if (subcommand === 'dodaj_opcje') {
-      const name = interaction.options.getString('imie_nazwisko', true);
-      const badge = interaction.options.getString('odznaka', true);
-      const type = interaction.options.getString('typ', true);
-      const hours = interaction.options.getInteger('godziny', true);
-      const minutes = interaction.options.getInteger('minuty', true);
-
-      await client.prisma.dutyLog.create({
-        data: {
-          guildId: guild.id,
-          userId: dbUser.id,
-          name,
-          badge,
-          type,
-          hours,
-          minutes,
-        },
-      });
-
-      await interaction.reply({
-        embeds: [
-          Embed.success('Zapisano raport', `Pomyślnie dodano szkolenie **${type}** dla **${name}** (${hours}h ${minutes}m).`)
-        ],
-      });
-      return;
-    }
-
     if (subcommand === 'statystyki') {
-      const targetUser = interaction.options.getUser('osoba') || interaction.user;
-      
-      let targetDbUser = await client.prisma.user.findUnique({ where: { discordId: targetUser.id } });
-      if (!targetDbUser) {
-        await interaction.reply({ embeds: [Embed.warning('Brak Danych', 'Ta osoba nie ma jeszcze żadnych wpisów.')] });
-        return;
-      }
+      const badge = interaction.options.getString('odznaka', true).trim();
 
       const logs = await client.prisma.dutyLog.findMany({
-        where: { guildId: guild.id, userId: targetDbUser.id },
+        where: { guildId: guild.id, badge: { contains: badge } },
       });
 
-      if (logs.length === 0) {
-        await interaction.reply({ embeds: [Embed.warning('Brak Danych', 'Brak zarejestrowanych szkoleń dla tej osoby.')] });
+      // Filtrujemy dokładniej dla numeru odznaki (ponieważ np odznaka 1 mogłaby zwrócić "12")
+      const exactLogs = logs.filter(log => {
+        const badges = log.badge.split(/[, ]+/).map(b => b.trim());
+        return badges.includes(badge);
+      });
+
+      if (exactLogs.length === 0) {
+        await interaction.reply({ embeds: [Embed.warning('Brak Danych', `Brak zarejestrowanych szkoleń dla odznaki **${badge}**.`)] });
         return;
       }
 
       const typeCounts: Record<string, number> = {};
       let totalMinutes = 0;
+      let employeeName = exactLogs[0].name;
 
-      for (const log of logs) {
+      for (const log of exactLogs) {
         typeCounts[log.type] = (typeCounts[log.type] || 0) + 1;
         totalMinutes += (log.hours * 60) + log.minutes;
       }
@@ -172,22 +126,15 @@ export default class GodzinkiCommand extends Command {
       const sumHours = Math.floor(totalMinutes / 60);
       const sumMins = totalMinutes % 60;
 
-      const typesMap: Record<string, string> = {
-        nego: 'Negocjacje (nego)',
-        sv: 'Supervisory (sv)',
-        mery: 'Merytoryka (mery)',
-        meryof: 'Merytoryka Oficerska (meryof)',
-        med: 'Medyczne (med)'
-      };
-
       const fields = Object.entries(typeCounts).map(([type, count]) => {
-        return { name: typesMap[type] || type.toUpperCase(), value: `${count} razy`, inline: true };
+        // Capitalize first letter of type
+        const formattedType = type.charAt(0).toUpperCase() + type.slice(1);
+        return { name: formattedType, value: `${count} razy`, inline: true };
       });
 
-      const embed = Embed.info(`Statystyki: ${targetUser.username}`)
-        .setDescription(`Łączny czas: **${sumHours} godzin, ${sumMins} minut**\nŁącznie odbytych szkoleń: **${logs.length}**`)
-        .addFields(fields)
-        .setThumbnail(targetUser.displayAvatarURL());
+      const embed = Embed.info(`Statystyki: Odznaka ${badge}`)
+        .setDescription(`**Imię i nazwisko (z ostatniego wpisu):** ${employeeName}\n\nŁączny czas: **${sumHours} godzin, ${sumMins} minut**\nŁącznie odbytych szkoleń: **${exactLogs.length}**`)
+        .addFields(fields);
 
       await interaction.reply({ embeds: [embed] });
     }

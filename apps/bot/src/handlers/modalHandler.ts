@@ -8,7 +8,8 @@ export async function handleGodzinkiModal(client: BotClient, interaction: ModalS
     if (!interaction.guildId) return;
 
     const name = interaction.fields.getTextInputValue('godzinki_name');
-    const badge = interaction.fields.getTextInputValue('godzinki_badge');
+    const badgeStr = interaction.fields.getTextInputValue('godzinki_badge');
+    const badges = badgeStr.split(/[, ]+/).map(b => b.trim()).filter(b => b.length > 0);
     const type = interaction.fields.getTextInputValue('godzinki_type').toLowerCase();
     const timeStr = interaction.fields.getTextInputValue('godzinki_time').toLowerCase();
 
@@ -57,21 +58,28 @@ export async function handleGodzinkiModal(client: BotClient, interaction: ModalS
       });
     }
 
-    await client.prisma.dutyLog.create({
-      data: {
-        guildId: guild.id,
-        userId: dbUser.id,
-        name,
-        badge,
-        type,
-        hours,
-        minutes,
-      },
+    if (badges.length === 0) {
+      await interaction.reply({ content: 'Musisz podać co najmniej jedną odznakę.', ephemeral: true });
+      return;
+    }
+
+    const insertData = badges.map(b => ({
+      guildId: guild.id,
+      userId: dbUser.id,
+      name,
+      badge: b,
+      type,
+      hours,
+      minutes,
+    }));
+
+    await client.prisma.dutyLog.createMany({
+      data: insertData,
     });
 
     await interaction.reply({
       embeds: [
-        Embed.success('Zapisano raport', `Pomyślnie dodano szkolenie **${type}** dla **${name}** (${hours}h ${minutes}m).`)
+        Embed.success('Zapisano raport', `Pomyślnie dodano szkolenie **${type}** dla **${badges.length}** osób (Odznaki: ${badges.join(', ')}) (${hours}h ${minutes}m).`)
       ],
     });
   } catch (error) {
