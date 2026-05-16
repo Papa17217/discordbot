@@ -37,7 +37,7 @@ export default class TicketCommand extends Command {
   private async createTicket(interaction: ChatInputCommandInteraction, client: BotClient) {
     const subject = interaction.options.getString('subject') || 'Pomoc';
     const guild = await client.prisma.guild.findUnique({
-      where: { discordId: interaction.guildId! },
+      where: { discordId_botType: { discordId: interaction.guildId! , botType: 'PRIVATE' } },
       include: { ticketConfig: true },
     });
     if (!guild || !guild.ticketConfig) {

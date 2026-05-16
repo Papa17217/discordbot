@@ -21,7 +21,7 @@ export default class DailyCommand extends Command {
 
   async execute(interaction: ChatInputCommandInteraction, client: BotClient) {
     const guild = await client.prisma.guild.findUnique({
-      where: { discordId: interaction.guildId! },
+      where: { discordId_botType: { discordId: interaction.guildId! , botType: 'PRIVATE' } },
       include: { economyConfig: true },
     });
     if (!guild) return;

@@ -276,7 +276,7 @@ async function handleAddRole(client: BotClient, interaction: ButtonInteraction |
 
 async function handleLegacyCreateTicket(client: BotClient, interaction: ButtonInteraction) {
   const guild = await client.prisma.guild.findUnique({
-    where: { discordId: interaction.guildId! },
+    where: { discordId_botType: { discordId: interaction.guildId! , botType: 'PRIVATE' } },
     include: { ticketConfig: true },
   });
   if (!guild || !guild.ticketConfig) {

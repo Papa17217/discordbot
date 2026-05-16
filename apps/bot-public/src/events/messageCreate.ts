@@ -24,7 +24,7 @@ export default class MessageCreateEvent extends Event<'messageCreate'> {
 
 
       const guild = await client.prisma.guild.findUnique({
-        where: { discordId: message.guild.id },
+        where: { discordId_botType: { discordId: message.guild.id , botType: 'PUBLIC' } },
         include: { config: true, levelConfig: true },
       });
 

@@ -66,7 +66,7 @@ export default class InteractionCreateEvent extends Event<'interactionCreate'> {
       // Zapisz użycie komendy w analytics
       if (interaction.guildId) {
         const guild = await client.prisma.guild.findUnique({
-          where: { discordId: interaction.guildId },
+          where: { discordId_botType: { discordId: interaction.guildId , botType: 'PRIVATE' } },
         });
 
         if (guild) {

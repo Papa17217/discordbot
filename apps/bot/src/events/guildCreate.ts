@@ -37,7 +37,7 @@ export default class GuildCreateEvent extends Event<'guildCreate'> {
 
       // 2. Teraz możemy bezpiecznie dodać/zaktualizować serwer
       await client.prisma.guild.upsert({
-        where: { discordId: guild.id },
+        where: { discordId_botType: { discordId: guild.id , botType: 'PRIVATE' } },
         update: { name: guild.name, icon: guild.icon, memberCount: guild.memberCount },
         create: {
           discordId: guild.id,

@@ -37,7 +37,7 @@ export default class KickCommand extends Command {
 
     await member.kick(`${interaction.user.tag}: ${reason}`);
 
-    const guild = await client.prisma.guild.findUnique({ where: { discordId: interaction.guildId! } });
+    const guild = await client.prisma.guild.findUnique({ where: { discordId_botType: { discordId: interaction.guildId! , botType: 'PRIVATE' } } });
     if (guild) {
       let mod = await client.prisma.user.findUnique({ where: { discordId: interaction.user.id } });
       if (!mod) mod = await client.prisma.user.create({ data: { discordId: interaction.user.id, username: interaction.user.username, avatar: interaction.user.avatar } });

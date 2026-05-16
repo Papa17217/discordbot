@@ -48,13 +48,14 @@ model User {
 
 model Guild {
   id          String   @id @default(cuid())
-  discordId   String   @unique
+  discordId   String
   name        String
   icon        String?
   ownerId     String
   memberCount Int      @default(0)
   premium     Boolean  @default(false)
   premiumTier Tier     @default(FREE)
+  botType     BotType  @default(PRIVATE)
 
   joinedAt  DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -84,6 +85,7 @@ model Guild {
   moderationConfig ModerationConfig?
   reactionPanels  ReactionPanel[]
 
+  @@unique([discordId, botType])
   @@index([discordId])
   @@map("guilds")
 }

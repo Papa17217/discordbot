@@ -23,7 +23,7 @@ export default class BalanceCommand extends Command {
   async execute(interaction: ChatInputCommandInteraction, client: BotClient) {
     const targetUser = interaction.options.getUser('user') || interaction.user;
     const guild = await client.prisma.guild.findUnique({
-      where: { discordId: interaction.guildId! },
+      where: { discordId_botType: { discordId: interaction.guildId! , botType: 'PRIVATE' } },
       include: { economyConfig: true },
     });
     if (!guild) return;

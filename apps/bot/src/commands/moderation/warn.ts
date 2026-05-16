@@ -25,7 +25,7 @@ export default class WarnCommand extends Command {
     const target = interaction.options.getUser('user', true);
     const reason = interaction.options.getString('reason', true);
 
-    const guild = await client.prisma.guild.findUnique({ where: { discordId: interaction.guildId! } });
+    const guild = await client.prisma.guild.findUnique({ where: { discordId_botType: { discordId: interaction.guildId! , botType: 'PRIVATE' } } });
     if (!guild) return;
 
     let mod = await client.prisma.user.findUnique({ where: { discordId: interaction.user.id } });

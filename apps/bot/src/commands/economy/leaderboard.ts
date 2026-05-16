@@ -29,7 +29,7 @@ export default class LeaderboardCommand extends Command {
 
   async execute(interaction: ChatInputCommandInteraction, client: BotClient) {
     const type = interaction.options.getString('type') || 'economy';
-    const guild = await client.prisma.guild.findUnique({ where: { discordId: interaction.guildId! } });
+    const guild = await client.prisma.guild.findUnique({ where: { discordId_botType: { discordId: interaction.guildId! , botType: 'PRIVATE' } } });
     if (!guild) return;
 
     let orderBy: any;

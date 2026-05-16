@@ -40,6 +40,7 @@ export class GuildsService {
     const [botGuilds, managedGuilds] = await Promise.all([
       this.prisma.guild.findMany({
         select: { discordId: true, id: true, memberCount: true, premium: true },
+        where: { botType: bot.toUpperCase() as any },
       }),
       this.botService.getManagedGuilds(bot),
     ]);
@@ -103,9 +104,10 @@ export class GuildsService {
 
   // ── Pobierz lub utwórz guild ──
 
-  async findOrCreateGuild(discordId: string, name: string, icon: string | null, ownerId: string) {
+  async findOrCreateGuild(discordId: string, name: string, icon: string | null, ownerId: string, bot: BotType = 'private') {
+    const botTypeEnum = bot.toUpperCase() as any;
     let guild = await this.prisma.guild.findUnique({
-      where: { discordId },
+      where: { discordId_botType: { discordId, botType: botTypeEnum } },
     });
 
     if (!guild) {
@@ -115,6 +117,7 @@ export class GuildsService {
           name,
           icon,
           ownerId,
+          botType: botTypeEnum,
           config: {
             create: {},
           },
@@ -123,7 +126,7 @@ export class GuildsService {
       });
     } else {
       guild = await this.prisma.guild.update({
-        where: { discordId },
+        where: { discordId_botType: { discordId, botType: botTypeEnum } },
         data: { name, icon },
       });
     }
@@ -144,10 +147,11 @@ export class GuildsService {
 
   // ── Usuń guild ──
 
-  async removeGuild(discordId: string) {
-    const guild = await this.prisma.guild.findUnique({ where: { discordId } });
+  async removeGuild(discordId: string, bot: BotType = 'private') {
+    const botTypeEnum = bot.toUpperCase() as any;
+    const guild = await this.prisma.guild.findUnique({ where: { discordId_botType: { discordId, botType: botTypeEnum } } });
     if (guild) {
-      await this.prisma.guild.delete({ where: { discordId } });
+      await this.prisma.guild.delete({ where: { discordId_botType: { discordId, botType: botTypeEnum } } });
       await this.redis.del(`guild:${guild.id}`);
     }
   }

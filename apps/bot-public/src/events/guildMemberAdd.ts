@@ -16,7 +16,7 @@ export default class GuildMemberAddEvent extends Event<'guildMemberAdd'> {
   async execute(client: BotClient, member: GuildMember) {
     try {
       const guild = await client.prisma.guild.findUnique({
-        where: { discordId: member.guild.id },
+        where: { discordId_botType: { discordId: member.guild.id , botType: 'PUBLIC' } },
         include: { config: true, welcomeConfig: true },
       });
 

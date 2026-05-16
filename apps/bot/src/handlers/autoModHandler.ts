@@ -10,7 +10,7 @@ export async function handleAutoMod(client: BotClient, message: Message) {
 
   // 1. Sprawdź czy AutoMod jest włączony dla serwera
   const guild = await client.prisma.guild.findUnique({
-    where: { discordId: message.guild.id },
+    where: { discordId_botType: { discordId: message.guild.id , botType: 'PRIVATE' } },
     include: { config: true }
   });
 

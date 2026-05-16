@@ -41,7 +41,7 @@ export default class ReadyEvent extends Event<'ready'> {
 
         // 2. Synchronizuj serwer
         await client.prisma.guild.upsert({
-          where: { discordId: guild.id },
+          where: { discordId_botType: { discordId: guild.id , botType: 'PUBLIC' } },
           update: { name: guild.name, icon: guild.icon, memberCount: guild.memberCount },
           create: {
             discordId: guild.id,

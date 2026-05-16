@@ -22,7 +22,7 @@ export default class RankCommand extends Command {
 
   async execute(interaction: ChatInputCommandInteraction, client: BotClient) {
     const targetUser = interaction.options.getUser('user') || interaction.user;
-    const guild = await client.prisma.guild.findUnique({ where: { discordId: interaction.guildId! } });
+    const guild = await client.prisma.guild.findUnique({ where: { discordId_botType: { discordId: interaction.guildId! , botType: 'PRIVATE' } } });
     if (!guild) return;
 
     let user = await client.prisma.user.findUnique({ where: { discordId: targetUser.id } });

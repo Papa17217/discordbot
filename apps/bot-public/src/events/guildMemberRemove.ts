@@ -15,7 +15,7 @@ export default class GuildMemberRemoveEvent extends Event<'guildMemberRemove'> {
   async execute(client: BotClient, member: GuildMember | PartialGuildMember) {
     try {
       const guild = await client.prisma.guild.findUnique({
-        where: { discordId: member.guild.id },
+        where: { discordId_botType: { discordId: member.guild.id , botType: 'PUBLIC' } },
         include: { config: true, welcomeConfig: true },
       });
 

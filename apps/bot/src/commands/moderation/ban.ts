@@ -46,7 +46,7 @@ export default class BanCommand extends Command {
       });
 
       // Zapisz w bazie
-      const guild = await client.prisma.guild.findUnique({ where: { discordId: interaction.guildId! } });
+      const guild = await client.prisma.guild.findUnique({ where: { discordId_botType: { discordId: interaction.guildId! , botType: 'PRIVATE' } } });
       if (guild) {
         let moderator = await client.prisma.user.findUnique({ where: { discordId: interaction.user.id } });
         if (!moderator) {

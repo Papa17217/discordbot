@@ -35,7 +35,7 @@ export default class SetupCommand extends Command {
     const channel = interaction.options.getChannel('channel', true);
 
     const guild = await client.prisma.guild.upsert({
-      where: { discordId: interaction.guildId! },
+      where: { discordId_botType: { discordId: interaction.guildId! , botType: 'PRIVATE' } },
       update: {},
       create: { discordId: interaction.guildId!, name: interaction.guild!.name, ownerId: interaction.guild!.ownerId },
     });
