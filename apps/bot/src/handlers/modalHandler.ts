@@ -81,6 +81,7 @@ export async function handleGodzinkiModal(client: BotClient, interaction: ModalS
       embeds: [
         Embed.success('Zapisano raport', `Pomyślnie dodano szkolenie **${type}** dla **${badges.length}** osób (Odznaki: ${badges.join(', ')}) (${hours}h ${minutes}m).`)
       ],
+      ephemeral: true,
     });
   } catch (error) {
     logger.error('Błąd w formularzu godzinki:', error);

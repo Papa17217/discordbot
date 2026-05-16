@@ -6,7 +6,7 @@ import {
   TextInputStyle,
   ActionRowBuilder,
   ModalActionRowComponentBuilder,
-  PermissionFlagsBits,
+  GuildMember,
 } from 'discord.js';
 import { Command } from '../../structures/Command';
 import { Embed } from '../../structures/Embed';
@@ -28,6 +28,11 @@ export default class GodzinkiCommand extends Command {
             .setName('statystyki')
             .setDescription('Sprawdź statystyki po numerze odznaki')
             .addStringOption((opt) => opt.setName('odznaka').setDescription('Numer odznaki postaci').setRequired(true))
+        )
+        .addSubcommand((sub) =>
+          sub
+            .setName('wyczysc')
+            .setDescription('Wyczyść wszystkie logi godzin i szkoleń (tylko dla zarządu)')
         ),
       cooldown: 5,
       module: 'utility',
@@ -96,7 +101,15 @@ export default class GodzinkiCommand extends Command {
       return;
     }
 
+    const allowedRoles = ['1498303677583327472', '1498308470351331438', '1498303677583327471'];
+    const hasPermission = interaction.member && (interaction.member as GuildMember).roles.cache.some(role => allowedRoles.includes(role.id));
+
     if (subcommand === 'statystyki') {
+      if (!hasPermission) {
+        await interaction.reply({ content: 'Nie masz uprawnień do sprawdzania statystyk.', ephemeral: true });
+        return;
+      }
+
       const badge = interaction.options.getString('odznaka', true).trim();
 
       const logs = await client.prisma.dutyLog.findMany({
@@ -137,6 +150,23 @@ export default class GodzinkiCommand extends Command {
         .addFields(fields);
 
       await interaction.reply({ embeds: [embed] });
+      return;
+    }
+
+    if (subcommand === 'wyczysc') {
+      if (!hasPermission) {
+        await interaction.reply({ content: 'Nie masz uprawnień do użycia tej komendy.', ephemeral: true });
+        return;
+      }
+
+      await client.prisma.dutyLog.deleteMany({
+        where: { guildId: guild.id },
+      });
+
+      await interaction.reply({
+        embeds: [Embed.success('Wyczyszczono', 'Wszystkie godziny i raporty ze szkoleń zostały wyczyszczone pomyślnie.')]
+      });
+      return;
     }
   }
 }
