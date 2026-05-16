@@ -37,7 +37,7 @@ export default class SetupCommand extends Command {
     const guild = await client.prisma.guild.upsert({
       where: { discordId_botType: { discordId: interaction.guildId! , botType: 'PRIVATE' } },
       update: {},
-      create: { discordId: interaction.guildId!, name: interaction.guild!.name, ownerId: interaction.guild!.ownerId },
+      create: { discordId: interaction.guildId!, name: interaction.guild!.name, ownerId: interaction.guild!.ownerId, botType: 'PRIVATE' },
     });
 
     if (subcommand === 'welcome') {

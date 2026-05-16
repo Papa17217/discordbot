@@ -45,6 +45,7 @@ export default class GuildCreateEvent extends Event<'guildCreate'> {
           icon: guild.icon,
           ownerId: guild.ownerId,
           memberCount: guild.memberCount,
+          botType: 'PRIVATE',
           config: { create: {} },
         },
       });

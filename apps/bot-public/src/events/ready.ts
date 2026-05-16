@@ -49,6 +49,7 @@ export default class ReadyEvent extends Event<'ready'> {
             icon: guild.icon,
             ownerId: guild.ownerId,
             memberCount: guild.memberCount,
+            botType: 'PUBLIC',
             config: { create: {} },
           },
         });
