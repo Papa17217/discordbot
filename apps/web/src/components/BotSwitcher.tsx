@@ -7,6 +7,7 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { Bot, ChevronDown, Lock, Unlock, Circle } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
+import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/stores/authStore';
 import { api } from '@/lib/api';
 import { cn } from '@/lib/utils';
@@ -40,6 +41,7 @@ export function BotSwitcher({ collapsed = false }: { collapsed?: boolean }) {
   const { user, activeBotType, setActiveBotType } = useAuthStore();
   const [isOpen, setIsOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
   const [botStatuses, setBotStatuses] = useState<Record<string, boolean>>({
     private: false,
     public: false,
@@ -85,6 +87,8 @@ export function BotSwitcher({ collapsed = false }: { collapsed?: boolean }) {
     if (!hasAccess(botType)) return;
     setActiveBotType(botType);
     setIsOpen(false);
+    router.push('/dashboard/servers');
+    router.refresh();
   };
 
   const dropdown = (

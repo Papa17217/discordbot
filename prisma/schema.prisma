@@ -39,6 +39,7 @@ model User {
   sessions         Session[]
   commandUsages    CommandUsage[]
   botWhitelist     BotWhitelist[]
+  dutyLogs         DutyLog[]
 
   @@index([discordId])
   @@map("users")
@@ -84,6 +85,7 @@ model Guild {
   subscriptions   Subscription[]
   moderationConfig ModerationConfig?
   reactionPanels  ReactionPanel[]
+  dutyLogs        DutyLog[]
 
   @@unique([discordId, botType])
   @@index([discordId])
@@ -762,3 +764,25 @@ model BotWhitelist {
   @@index([botType])
   @@map("bot_whitelist")
 }
+
+// �� Duty / Godzinki ������������������������
+
+model DutyLog {
+  id        String   @id @default(cuid())
+  guildId   String
+  guild     Guild    @relation(fields: [guildId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  name      String
+  badge     String
+  type      String   // nego, sv, mery, meryof, med
+  hours     Int
+  minutes   Int
+
+  createdAt DateTime @default(now())
+
+  @@index([guildId, userId])
+  @@map("duty_logs")
+}
+

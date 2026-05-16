@@ -36,6 +36,13 @@ export default class InteractionCreateEvent extends Event<'interactionCreate'> {
     }
 
 
+    if (interaction.isModalSubmit()) {
+      if (interaction.customId === 'godzinki_modal') {
+        const { handleGodzinkiModal } = require('../handlers/modalHandler');
+        return handleGodzinkiModal(client, interaction);
+      }
+    }
+
     if (!interaction.isChatInputCommand()) return;
 
     const command = client.commands.get(interaction.commandName);
