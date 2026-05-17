@@ -777,6 +777,7 @@ model DutyLog {
   name      String
   badge     String
   type      String   // nego, sv, mery, meryof, med
+  examinedBadge String? // <--- NEW FIELD
   hours     Int
   minutes   Int
 

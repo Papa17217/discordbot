@@ -13,6 +13,13 @@ export async function handleGodzinkiModal(client: BotClient, interaction: ModalS
     const type = interaction.fields.getTextInputValue('godzinki_type').toLowerCase();
     const timeStr = interaction.fields.getTextInputValue('godzinki_time').toLowerCase();
 
+    let examinedBadgeStr = '';
+    try {
+      examinedBadgeStr = interaction.fields.getTextInputValue('godzinki_examined_badge').trim();
+    } catch {
+      // Ignore if it doesn't exist (old modal or optional)
+    }
+
     // Proste parsowanie czasu, np. "2h 30m", "1.5h", "45m"
     let hours = 0;
     let minutes = 0;
@@ -69,6 +76,7 @@ export async function handleGodzinkiModal(client: BotClient, interaction: ModalS
       name,
       badge: b,
       type,
+      examinedBadge: examinedBadgeStr || null,
       hours,
       minutes,
     }));

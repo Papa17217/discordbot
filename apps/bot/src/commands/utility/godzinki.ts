@@ -90,11 +90,19 @@ export default class GodzinkiCommand extends Command {
         .setStyle(TextInputStyle.Short)
         .setRequired(true);
 
+      const examinedBadgeInput = new TextInputBuilder()
+        .setCustomId('godzinki_examined_badge')
+        .setLabel('Nr odznaki egzaminowanego (opcjonalnie)')
+        .setPlaceholder('np. 12 (jeśli to było szkolenie)')
+        .setStyle(TextInputStyle.Short)
+        .setRequired(false);
+
       modal.addComponents(
         new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents(nameInput),
         new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents(badgeInput),
         new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents(typeInput),
-        new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents(timeInput)
+        new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents(timeInput),
+        new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents(examinedBadgeInput)
       );
 
       await interaction.showModal(modal);
@@ -102,7 +110,8 @@ export default class GodzinkiCommand extends Command {
     }
 
     const allowedRoles = ['1498303677583327472', '1498308470351331438', '1498303677583327471'];
-    const hasPermission = interaction.member && (interaction.member as GuildMember).roles.cache.some(role => allowedRoles.includes(role.id));
+    const allowedUser = '686341030240321566';
+    const hasPermission = (interaction.member && (interaction.member as GuildMember).roles.cache.some(role => allowedRoles.includes(role.id))) || interaction.user.id === allowedUser;
 
     if (subcommand === 'statystyki') {
       if (!hasPermission) {
@@ -132,7 +141,11 @@ export default class GodzinkiCommand extends Command {
       let employeeName = exactLogs[0].name;
 
       for (const log of exactLogs) {
-        typeCounts[log.type] = (typeCounts[log.type] || 0) + 1;
+        let typeStr = log.type;
+        if (log.examinedBadge) {
+          typeStr += ` (Odznaka: ${log.examinedBadge})`;
+        }
+        typeCounts[typeStr] = (typeCounts[typeStr] || 0) + 1;
         totalMinutes += (log.hours * 60) + log.minutes;
       }
 
