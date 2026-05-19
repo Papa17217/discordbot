@@ -66,8 +66,8 @@ export class BotClient extends Client {
     this.user?.setPresence({
       activities: [
         {
-          name: `${this.guilds.cache.size} serwerów`,
-          type: ActivityType.Watching,
+          name: 'Twoich komend',
+          type: ActivityType.Listening,
         },
       ],
       status: 'online',
