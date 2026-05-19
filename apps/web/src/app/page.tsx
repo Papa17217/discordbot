@@ -7,6 +7,7 @@
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { Bot, Shield, Coins, BarChart3, Zap, Star, ArrowRight, Sparkles } from 'lucide-react';
+import FeatureTour from '@/components/FeatureTour';
 
 const features = [
   { icon: Shield, title: 'Moderacja', desc: 'Zaawansowany automod, ostrzeżenia, bany, mute i purge.' },
@@ -88,6 +89,31 @@ export default function LandingPage() {
             </Link>
           </div>
         </motion.div>
+
+        {/* Onboarding / Feature Tour */}
+        <motion.section
+          initial={{ opacity: 0, y: 40 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-100px' }}
+          transition={{ duration: 0.7 }}
+          className="mt-32"
+          aria-label="Interaktywny tour po funkcjach"
+        >
+          <div className="mb-10 text-center">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-accent/20 bg-accent/5 mb-4">
+              <Sparkles className="w-4 h-4 text-accent" />
+              <span className="text-sm text-accent">Zobacz panel w akcji</span>
+            </div>
+            <h2 className="text-3xl md:text-5xl font-bold">
+              Interaktywny <span className="gradient-text">tour 3D</span>
+            </h2>
+            <p className="mt-3 text-foreground-secondary max-w-xl mx-auto">
+              Przejdź przez kluczowe funkcje, zobacz jak działa drag &amp; drop ticketów
+              i poczuj dynamikę panelu zanim zaczniesz.
+            </p>
+          </div>
+          <FeatureTour />
+        </motion.section>
 
         {/* Features */}
         <motion.div
