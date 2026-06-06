@@ -109,7 +109,7 @@ export default class GodzinkiCommand extends Command {
       return;
     }
 
-    const allowedRoles = ['1498303677583327472', '1498308470351331438', '1498303677583327471'];
+    const allowedRoles = ['1498303677583327472', '1498308470351331438', '1498303677583327471', '1505199931722436729'];
     const allowedUser = '686341030240321566';
     const hasPermission = (interaction.member && (interaction.member as GuildMember).roles.cache.some(role => allowedRoles.includes(role.id))) || interaction.user.id === allowedUser;
 
